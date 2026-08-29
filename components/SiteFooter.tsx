@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { site, whatsappUrl } from "@/lib/site";
+import { Logo } from "./Logo";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-paper/15">
       <div className="container-lp flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xl font-extrabold">Sô criativa</p>
+          <Logo width={160} className="h-auto w-[160px]" />
           <p className="mt-1 text-sm text-paper/65">{site.tagline}</p>
         </div>
 

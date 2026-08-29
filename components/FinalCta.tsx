@@ -26,7 +26,9 @@ export function FinalCta() {
         <Mascot
           file="microfone.png"
           alt="Mascote da Sô Criativa segurando um microfone boom em frente a uma câmera"
-          className="aspect-[4/3] w-full max-w-xl"
+          ratio={1600 / 816}
+          className="w-full max-w-2xl"
+          sizes="(max-width: 768px) 92vw, 620px"
         />
 
         <Link

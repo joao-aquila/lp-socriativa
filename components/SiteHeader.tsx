@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { Logo } from "./Logo";
 
 const nav = [
   { href: "/#projetos", label: "projetos" },
@@ -27,12 +28,8 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <Link
-          href="/"
-          className="text-2xl font-extrabold tracking-tight md:text-3xl"
-          aria-label={`${site.name} — página inicial`}
-        >
-          Sô<span className="text-paper/70"> criativa</span>
+        <Link href="/" aria-label={`${site.name} — página inicial`}>
+          <Logo width={190} priority className="h-auto w-[150px] md:w-[190px]" />
         </Link>
       </div>
     </header>

@@ -30,7 +30,9 @@ export function Process() {
         <Mascot
           file="notebook.png"
           alt="Mascote da Sô Criativa trabalhando atrás de um notebook"
-          className="aspect-square w-full max-w-sm justify-self-center"
+          ratio={1093 / 1200}
+          className="w-full max-w-sm justify-self-center"
+          sizes="(max-width: 768px) 80vw, 340px"
         />
 
         <ol className="grid gap-4 sm:grid-cols-2">

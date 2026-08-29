@@ -11,18 +11,22 @@ npm run dev                  # http://localhost:3000
 
 Scripts: `dev`, `build`, `start`, `typecheck`.
 
-## Onde entram as imagens
+## Imagens
 
-Nada quebra enquanto as artes não chegam: cada mídia tem um placeholder com o mesmo tamanho da imagem final.
+Marca e mascote já estão no repositório (recortados e redimensionados a partir das artes originais):
 
-| O quê | Onde colocar | Nome esperado |
-| --- | --- | --- |
-| Mascote do hero | `public/images/mascote/` | `selfie.png` |
-| Mascote do processo | `public/images/mascote/` | `notebook.png` |
-| Mascote do CTA final | `public/images/mascote/` | `microfone.png` |
-| Artes do portfólio | `public/images/portfolio/` | qualquer nome — o caminho vai no campo `image` do projeto |
+| O quê | Arquivo |
+| --- | --- |
+| Logotipo (variante clara, usada no fundo escuro) | `public/images/logo-horizontal-light.png` |
+| Logotipo original (tinta escura, para fundos claros) | `public/images/logo-horizontal.png` |
+| Mascote do hero | `public/images/mascote/selfie.png` |
+| Mascote do processo | `public/images/mascote/notebook.png` |
+| Mascote do CTA final | `public/images/mascote/microfone.png` |
+| Favicon / ícone iOS | `app/icon.png`, `app/apple-icon.png` |
 
-`lib/media.ts` checa se o arquivo existe em `/public`; se existir, o `next/image` assume no lugar do placeholder. PNG com fundo transparente para os mascotes.
+Falta só o **portfólio**: coloque as artes em `public/images/portfolio/` e aponte o caminho no campo `image` de cada projeto (pelo `/admin` ou direto no JSON). Sem `image`, o card mostra um placeholder tracejado do mesmo tamanho — nada quebra.
+
+`lib/media.ts` checa se o arquivo existe em `/public` antes de renderizar; se existir, o `next/image` assume no lugar do placeholder.
 
 ## Conteúdo do portfólio
 

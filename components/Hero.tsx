@@ -37,8 +37,10 @@ export function Hero() {
 
         <Mascot
           file="selfie.png"
-          alt="Mascote da Sô Criativa, uma border collie, tirando uma selfie com o celular"
-          className="aspect-square w-full max-w-md justify-self-center"
+          alt="Mascote da Sô Criativa, uma border collie, olhando o celular"
+          ratio={1200 / 1061}
+          className="w-full max-w-md justify-self-center"
+          sizes="(max-width: 768px) 85vw, 420px"
           priority
         />
       </div>

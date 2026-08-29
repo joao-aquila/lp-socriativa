@@ -5,6 +5,8 @@ type Props = {
   /** nome do arquivo dentro de /public/images/mascote (ex.: "selfie.png") */
   file: string;
   alt: string;
+  /** proporção largura/altura da arte, para reservar o espaço certo */
+  ratio: number;
   className?: string;
   priority?: boolean;
   sizes?: string;
@@ -17,14 +19,15 @@ type Props = {
 export function Mascot({
   file,
   alt,
+  ratio,
   className = "",
   priority = false,
-  sizes = "(max-width: 768px) 70vw, 40vw",
+  sizes = "(max-width: 768px) 80vw, 40vw",
 }: Props) {
   const src = publicAsset(`/images/mascote/${file}`);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} style={{ aspectRatio: ratio }}>
       {src ? (
         <Image
           src={src}
@@ -32,7 +35,7 @@ export function Mascot({
           fill
           sizes={sizes}
           priority={priority}
-          className="object-contain object-bottom"
+          className="object-contain"
         />
       ) : (
         <div
