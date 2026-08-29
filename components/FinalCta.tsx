@@ -13,7 +13,8 @@ export function FinalCta() {
         <h2 id="contato-title" className="headline text-4xl sm:text-5xl lg:text-6xl">
           e agora, o que a gente cria?
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-paper/85 md:text-xl">
+        {/* uma linha só a partir do md; no mobile pode quebrar à vontade */}
+        <p className="mx-auto mt-4 text-base text-paper/85 md:whitespace-nowrap md:text-lg">
           <strong className="font-bold">me conta!</strong> pode ser uma ideia
           pronta, meio pronta ou um “não sei por onde começar”.
         </p>
