@@ -26,7 +26,7 @@ export default function OpengraphImage() {
         <div style={{ fontSize: 86, fontWeight: 800, lineHeight: 1.02, letterSpacing: -3 }}>
           estúdio criativo feito para marcas pessoais
         </div>
-        <div style={{ fontSize: 32, opacity: 0.75 }}>
+        <div style={{ fontSize: 36, opacity: 1 }}>
           criação de conteúdo ✳ design ✳ identidade visual
         </div>
       </div>

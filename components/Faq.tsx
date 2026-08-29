@@ -12,7 +12,7 @@ export function Faq() {
     <section aria-labelledby="faq-title" className="container-lp py-10 md:py-14">
       <Reveal>
         <h2 id="faq-title" className="headline text-center text-4xl sm:text-5xl">
-          dúvidas rápidas
+          faq
         </h2>
       </Reveal>
 
