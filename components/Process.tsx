@@ -1,4 +1,5 @@
 import { Mascot } from "./Mascot";
+import { Reveal } from "./Reveal";
 
 const steps = [
   { title: "briefing", detail: "a gente escuta antes de propor qualquer coisa." },
@@ -13,7 +14,7 @@ export function Process() {
       aria-labelledby="processo-title"
       className="container-lp py-20 md:py-28"
     >
-      <div className="text-center">
+      <Reveal className="text-center">
         <h2
           id="processo-title"
           className="headline text-4xl sm:text-5xl lg:text-6xl"
@@ -24,9 +25,10 @@ export function Process() {
           a gente <em className="italic">não começa criando</em>: começa{" "}
           <strong className="font-bold">entendendo</strong>.
         </p>
-      </div>
+      </Reveal>
 
       <div className="mt-12 grid items-center gap-10 md:grid-cols-[0.8fr_1.2fr]">
+        <Reveal>
         <Mascot
           file="notebook.png"
           alt="Mascote da Sô Criativa trabalhando atrás de um notebook"
@@ -34,11 +36,14 @@ export function Process() {
           className="w-full max-w-sm justify-self-center"
           sizes="(max-width: 768px) 80vw, 340px"
         />
+        </Reveal>
 
         <ol className="grid gap-4 sm:grid-cols-2">
           {steps.map((step, index) => (
-            <li
+            <Reveal
+              as="li"
               key={step.title}
+              delay={index * 90}
               className="rounded-card bg-paper p-6 text-ink"
             >
               <span className="text-sm font-bold uppercase tracking-widest text-ink/50">
@@ -48,7 +53,7 @@ export function Process() {
                 {step.title}
               </h3>
               <p className="mt-2 text-base text-ink/75">{step.detail}</p>
-            </li>
+            </Reveal>
           ))}
         </ol>
       </div>

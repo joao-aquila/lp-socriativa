@@ -1,44 +1,62 @@
-export const faq = [
-  {
-    question: "para quem a Sô Criativa trabalha?",
-    answer:
-      "Para marcas pessoais: psicólogos, dentistas, advogados, consultores e profissionais liberais que precisam comunicar com direção nas redes sociais.",
-  },
-  {
-    question: "quais serviços o estúdio oferece?",
-    answer:
-      "Criação de conteúdo (cronograma editorial, social media, captação), identidade visual (criação, rebranding e alinhamento) e design para postagens e materiais digitais.",
-  },
-  {
-    question: "como funciona o processo criativo?",
-    answer:
-      "Começa com briefing, passa por estudo e direção, alinhamento com você e só então a execução. A gente não começa criando: começa entendendo.",
-  },
-  {
-    question: "o atendimento é presencial ou online?",
-    answer:
-      "O atendimento é online para todo o Brasil, com captação de conteúdo presencial combinada caso a caso.",
-  },
-];
+"use client";
+
+import { useState } from "react";
+import { Star } from "./Star";
+import { Reveal } from "./Reveal";
+import { faq } from "@/lib/faq";
 
 export function Faq() {
-  return (
-    <section
-      aria-labelledby="faq-title"
-      className="container-lp py-20 md:py-28"
-    >
-      <h2 id="faq-title" className="headline text-center text-4xl sm:text-5xl">
-        dúvidas rápidas
-      </h2>
+  const [open, setOpen] = useState<number | null>(0);
 
-      <dl className="mx-auto mt-10 max-w-3xl divide-y divide-paper/15">
-        {faq.map((item) => (
-          <div key={item.question} className="py-6">
-            <dt className="text-xl font-bold md:text-2xl">{item.question}</dt>
-            <dd className="mt-2 text-lg text-paper/75">{item.answer}</dd>
-          </div>
-        ))}
-      </dl>
+  return (
+    <section aria-labelledby="faq-title" className="container-lp py-20 md:py-28">
+      <Reveal>
+        <h2 id="faq-title" className="headline text-center text-4xl sm:text-5xl">
+          dúvidas rápidas
+        </h2>
+      </Reveal>
+
+      <div className="mx-auto mt-10 max-w-3xl">
+        {faq.map((item, index) => {
+          const expanded = open === index;
+
+          return (
+            <Reveal key={item.question} delay={index * 70}>
+              <div className="border-b border-paper/15">
+                <h3>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(expanded ? null : index)}
+                    aria-expanded={expanded}
+                    aria-controls={`faq-panel-${index}`}
+                    className="flex w-full items-center gap-4 py-6 text-left text-xl font-bold transition hover:text-white md:text-2xl"
+                  >
+                    <Star
+                      className={`size-5 shrink-0 transition-transform duration-500 ${
+                        expanded ? "rotate-[135deg] text-paper" : "text-paper/50"
+                      }`}
+                    />
+                    <span className="flex-1">{item.question}</span>
+                  </button>
+                </h3>
+
+                <div
+                  id={`faq-panel-${index}`}
+                  role="region"
+                  aria-label={item.question}
+                  inert={!expanded}
+                  className="grid transition-[grid-template-rows] duration-400 ease-out"
+                  style={{ gridTemplateRows: expanded ? "1fr" : "0fr" }}
+                >
+                  <div className="overflow-hidden">
+                    <p className="pb-6 pl-9 text-lg text-paper/75">{item.answer}</p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          );
+        })}
+      </div>
     </section>
   );
 }

@@ -1,53 +1,46 @@
 import Link from "next/link";
-import { site, whatsappUrl } from "@/lib/site";
 import { Logo } from "./Logo";
+import { InstagramIcon, MailIcon, WhatsappIcon } from "./SocialIcons";
+import { site, whatsappUrl } from "@/lib/site";
+
+const socials = [
+  { href: site.instagram, label: "instagram", Icon: InstagramIcon, external: true },
+  { href: whatsappUrl(), label: "whatsapp", Icon: WhatsappIcon, external: true },
+  { href: `mailto:${site.email}`, label: `e-mail: ${site.email}`, Icon: MailIcon, external: false },
+];
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-paper/15">
-      <div className="container-lp flex flex-col gap-6 py-10 md:flex-row md:items-center md:justify-between">
+    <footer className="bg-ink">
+      <div className="container-lp flex flex-col gap-8 py-10 md:flex-row md:items-start md:justify-between">
         <div>
           <Logo width={160} className="h-auto w-[160px]" />
-          <p className="mt-1 text-sm text-paper/65">{site.tagline}</p>
+          <p className="mt-2 text-sm text-paper/60">{site.tagline}</p>
+          <p className="mt-6 text-xs text-paper/40">
+            © {new Date().getFullYear()} {site.legalName}. todos os direitos
+            reservados.
+          </p>
         </div>
 
-        <nav aria-label="Links de contato">
-          <ul className="flex flex-wrap gap-4 text-sm text-paper/80">
-            <li>
-              <Link
-                href={site.instagram}
-                target="_blank"
-                rel="noopener noreferrer me"
-                className="underline underline-offset-4 hover:text-paper"
-              >
-                instagram
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={whatsappUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline underline-offset-4 hover:text-paper"
-              >
-                whatsapp
-              </Link>
-            </li>
-            <li>
-              <a
-                href={`mailto:${site.email}`}
-                className="underline underline-offset-4 hover:text-paper"
-              >
-                {site.email}
-              </a>
-            </li>
+        <nav aria-label="Redes e contato">
+          <ul className="flex flex-col gap-3">
+            {socials.map(({ href, label, Icon, external }) => (
+              <li key={label}>
+                <Link
+                  href={href}
+                  aria-label={label}
+                  title={label}
+                  {...(external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  className="inline-flex size-11 items-center justify-center rounded-full border border-paper/20 text-paper/75 transition hover:border-paper hover:bg-paper hover:text-ink"
+                >
+                  <Icon className="size-5" />
+                </Link>
+              </li>
+            ))}
           </ul>
         </nav>
-      </div>
-
-      <div className="container-lp pb-8 text-xs text-paper/45">
-        © {new Date().getFullYear()} {site.legalName}. todos os direitos
-        reservados.
       </div>
     </footer>
   );

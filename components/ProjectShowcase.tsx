@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProjectCard } from "./ProjectCard";
-import type { Project, ProjectCategory } from "@/lib/types";
+import { Reveal } from "./Reveal";
+import type { Project } from "@/lib/types";
 
 type Props = {
   id?: string;
@@ -8,8 +9,10 @@ type Props = {
   subtitle?: string;
   projects: Project[];
   ctaLabel: string;
-  category: ProjectCategory;
+  ctaHref: string;
   emptyLabel?: string;
+  /** proporção única para todos os cards da grade */
+  cardAspect?: Project["aspect"];
 };
 
 export function ProjectShowcase({
@@ -18,35 +21,31 @@ export function ProjectShowcase({
   subtitle,
   projects,
   ctaLabel,
-  category,
+  ctaHref,
   emptyLabel = "novos projetos chegando por aqui",
+  cardAspect,
 }: Props) {
   return (
     <section
       id={id}
-      aria-labelledby={`${category}-title`}
-      className="container-lp scroll-mt-24 py-16 md:py-24"
+      aria-labelledby="projetos-title"
+      className="container-lp scroll-mt-24 py-20 md:py-28"
     >
-      <div className="text-center">
-        <h2
-          id={`${category}-title`}
-          className="headline text-4xl sm:text-5xl lg:text-6xl"
-        >
+      <Reveal className="text-center">
+        <h2 id="projetos-title" className="headline text-4xl sm:text-5xl lg:text-6xl">
           {title}
         </h2>
         {subtitle ? (
           <p className="mt-4 text-lg text-paper/80 md:text-xl">{subtitle}</p>
         ) : null}
-      </div>
+      </Reveal>
 
       {projects.length ? (
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((project, index) => (
-            <ProjectCard
-              key={project.slug}
-              project={project}
-              priority={index === 0}
-            />
+            <Reveal key={project.slug} delay={(index % 3) * 90}>
+              <ProjectCard project={project} aspect={cardAspect} />
+            </Reveal>
           ))}
         </div>
       ) : (
@@ -55,14 +54,14 @@ export function ProjectShowcase({
         </p>
       )}
 
-      <div className="mt-8 text-right">
+      <Reveal className="mt-8 text-right">
         <Link
-          href={`/projetos#${category}`}
+          href={ctaHref}
           className="text-lg font-medium underline decoration-2 underline-offset-4 transition hover:text-white md:text-xl"
         >
           {ctaLabel} <span aria-hidden="true">↗</span>
         </Link>
-      </div>
+      </Reveal>
     </section>
   );
 }

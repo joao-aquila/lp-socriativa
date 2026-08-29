@@ -1,21 +1,17 @@
 import Link from "next/link";
 import { Mascot } from "./Mascot";
+import { Reveal } from "./Reveal";
+import { Star } from "./Star";
 import { whatsappUrl } from "@/lib/site";
 
 export function Hero() {
   return (
-    <section className="container-lp pt-10 pb-16 md:pt-16 md:pb-24" id="topo">
-      <div className="grid items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
-        <div>
-          <h1 className="headline text-[3.25rem] leading-[0.9] sm:text-7xl lg:text-[5.5rem]">
+    <section className="container-lp pt-10 pb-16 md:pt-14 md:pb-20" id="topo">
+      <div className="grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr]">
+        <Reveal>
+          <h1 className="headline text-[4rem] leading-[0.88] sm:text-[6rem] lg:text-[7.5rem] xl:text-[8.5rem]">
             estúdio criativo feito para marcas pessoais
           </h1>
-
-          <p className="mt-6 max-w-xl text-lg text-paper/80 md:text-xl">
-            Criação de conteúdo, design e identidade visual para profissionais
-            que são a própria marca — psicólogos, dentistas, consultores e quem
-            mais precisa comunicar com direção.
-          </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -33,22 +29,29 @@ export function Hero() {
               ver projetos
             </Link>
           </div>
-        </div>
+        </Reveal>
 
-        <Mascot
-          file="selfie.png"
-          alt="Mascote da Sô Criativa, uma border collie, olhando o celular"
-          ratio={1200 / 1061}
-          className="w-full max-w-md justify-self-center"
-          sizes="(max-width: 768px) 85vw, 420px"
-          priority
-        />
+        <Reveal delay={120}>
+          <Mascot
+            file="selfie.png"
+            alt="Mascote da Sô Criativa, uma border collie, olhando o celular"
+            ratio={1200 / 1061}
+            className="w-full max-w-md justify-self-center"
+            sizes="(max-width: 768px) 85vw, 480px"
+            priority
+          />
+        </Reveal>
       </div>
 
-      <p className="mt-12 text-center text-base text-paper/75 md:text-lg">
-        criação de conteúdo <span aria-hidden="true">✳</span> design{" "}
-        <span aria-hidden="true">✳</span> identidade visual
-      </p>
+      <Reveal delay={200}>
+        <p className="mt-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-xl font-medium text-paper/85 sm:text-2xl md:text-3xl">
+          criação de conteúdo
+          <Star className="size-4 text-paper/60 md:size-5" />
+          design
+          <Star className="size-4 text-paper/60 md:size-5" />
+          identidade visual
+        </p>
+      </Reveal>
     </section>
   );
 }

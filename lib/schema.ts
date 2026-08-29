@@ -1,5 +1,5 @@
 import { site, siteUrl } from "./site";
-import { faq } from "@/components/Faq";
+import { faq } from "./faq";
 import type { Project } from "./types";
 
 export const organizationSchema = {

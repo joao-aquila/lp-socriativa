@@ -7,9 +7,12 @@ import type { Project } from "@/lib/types";
 export function ProjectCard({
   project,
   priority = false,
+  aspect,
 }: {
   project: Project;
   priority?: boolean;
+  /** força uma proporção única — usado nas grades mistas, para alinhar os cards */
+  aspect?: Project["aspect"];
 }) {
   const src = publicAsset(project.image);
 
@@ -22,7 +25,7 @@ export function ProjectCard({
       <MediaFrame
         src={src}
         alt={`${project.title} — projeto de ${categoryLabel[project.category]} para ${project.client}`}
-        aspect={project.aspect ?? "portrait"}
+        aspect={aspect ?? project.aspect ?? "portrait"}
         fallbackLabel="arte em breve"
         priority={priority}
         className="rounded-card"

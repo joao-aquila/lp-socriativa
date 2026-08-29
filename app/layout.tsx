@@ -77,6 +77,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR" className={archivo.variable}>
+      <head>
+        {/* sem JS não há IntersectionObserver: o conteúdo revelado no scroll
+            precisa aparecer de imediato */}
+        <noscript>
+          <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
+      </head>
       <body>{children}</body>
     </html>
   );

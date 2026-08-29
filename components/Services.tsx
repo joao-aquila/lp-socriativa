@@ -13,6 +13,8 @@ const services = [
   },
 ];
 
+import { Reveal } from "./Reveal";
+
 export function Services() {
   return (
     <section
@@ -20,7 +22,7 @@ export function Services() {
       aria-labelledby="servicos-title"
       className="container-lp scroll-mt-24 py-20 md:py-28"
     >
-      <div className="text-center">
+      <Reveal className="text-center">
         <h2
           id="servicos-title"
           className="headline text-4xl sm:text-5xl lg:text-6xl"
@@ -30,12 +32,14 @@ export function Services() {
         <p className="mt-4 text-lg text-paper/80 md:text-xl">
           se tem algo para comunicar, tem um jeito de criar.
         </p>
-      </div>
+      </Reveal>
 
       <ul className="mt-12 grid gap-5 md:grid-cols-3">
-        {services.map((service) => (
-          <li
+        {services.map((service, index) => (
+          <Reveal
+            as="li"
             key={service.title}
+            delay={index * 90}
             className="rounded-card bg-paper p-7 text-ink md:p-8"
           >
             <h3 className="text-3xl font-extrabold lg:text-4xl">
@@ -49,7 +53,7 @@ export function Services() {
                 </li>
               ))}
             </ul>
-          </li>
+          </Reveal>
         ))}
       </ul>
     </section>

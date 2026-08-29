@@ -9,7 +9,7 @@ import { FinalCta } from "@/components/FinalCta";
 import { Faq } from "@/components/Faq";
 import { SiteFooter } from "@/components/SiteFooter";
 import { JsonLd } from "@/components/JsonLd";
-import { getFeatured } from "@/lib/projects";
+import { getFeaturedAll } from "@/lib/projects";
 import { faqSchema, organizationSchema, websiteSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
 
@@ -20,10 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [conteudo, identidade] = await Promise.all([
-    getFeatured("conteudo"),
-    getFeatured("identidade"),
-  ]);
+  const projects = await getFeaturedAll(6);
 
   return (
     <>
@@ -33,22 +30,15 @@ export default async function HomePage() {
         <Hero />
         <Manifesto />
         <Services />
-        <div id="projetos" className="scroll-mt-24">
-          <ProjectShowcase
-            title="conteúdos entregues"
-            subtitle="um pouquinho do que já saiu daqui"
-            projects={conteudo}
-            category="conteudo"
-            ctaLabel="ver todos os projetos de conteúdo"
-          />
-          <ProjectShowcase
-            title="projetos entregues"
-            subtitle="identidades visuais que já ganharam o mundo"
-            projects={identidade}
-            category="identidade"
-            ctaLabel="ver todos os projetos de idv"
-          />
-        </div>
+        <ProjectShowcase
+          id="projetos"
+          title="projetos entregues"
+          subtitle="um pouquinho do que já saiu daqui"
+          projects={projects}
+          cardAspect="square"
+          ctaHref="/projetos"
+          ctaLabel="ver todos os projetos"
+        />
         <Process />
         <Faq />
         <FinalCta />

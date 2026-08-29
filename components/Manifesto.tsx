@@ -1,3 +1,6 @@
+import { Reveal } from "./Reveal";
+import { Star } from "./Star";
+
 export function Manifesto() {
   return (
     <section
@@ -5,6 +8,7 @@ export function Manifesto() {
       aria-labelledby="manifesto-title"
       className="container-lp scroll-mt-24 py-20 text-center md:py-28"
     >
+      <Reveal>
       <h2
         id="manifesto-title"
         className="headline mx-auto max-w-4xl text-4xl sm:text-5xl lg:text-6xl"
@@ -22,8 +26,9 @@ export function Manifesto() {
         <span className="underline decoration-2 underline-offset-4">
           direção
         </span>{" "}
-        <span aria-hidden="true">✳</span>
+        <Star className="inline size-5 align-[-0.15em] text-paper/70" />
       </p>
+      </Reveal>
     </section>
   );
 }
