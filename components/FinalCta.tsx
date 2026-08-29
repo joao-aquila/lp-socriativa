@@ -7,7 +7,7 @@ export function FinalCta() {
     <section
       id="contato"
       aria-labelledby="contato-title"
-      className="container-lp scroll-mt-24 pt-20 md:pt-28"
+      className="container-lp scroll-mt-24 pt-10 md:pt-14"
     >
       <Reveal className="text-center">
         <h2 id="contato-title" className="headline text-4xl sm:text-5xl lg:text-6xl">

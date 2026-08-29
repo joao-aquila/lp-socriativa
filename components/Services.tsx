@@ -20,7 +20,7 @@ export function Services() {
     <section
       id="servicos"
       aria-labelledby="servicos-title"
-      className="container-lp scroll-mt-24 py-20 md:py-28"
+      className="container-lp scroll-mt-24 py-10 md:py-14"
     >
       <Reveal className="text-center">
         <h2

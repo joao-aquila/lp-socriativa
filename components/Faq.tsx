@@ -9,7 +9,7 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section aria-labelledby="faq-title" className="container-lp py-20 md:py-28">
+    <section aria-labelledby="faq-title" className="container-lp py-10 md:py-14">
       <Reveal>
         <h2 id="faq-title" className="headline text-center text-4xl sm:text-5xl">
           dúvidas rápidas

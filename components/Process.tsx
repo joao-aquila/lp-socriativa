@@ -12,7 +12,7 @@ export function Process() {
   return (
     <section
       aria-labelledby="processo-title"
-      className="container-lp py-20 md:py-28"
+      className="container-lp py-10 md:py-14"
     >
       <Reveal className="text-center">
         <h2

@@ -59,14 +59,15 @@
     line-height: 0.92;
   }
 
-  /* full-bleed: sem recuo lateral, só um respiro mínimo no mobile */
   .container-lp {
     width: 100%;
-    padding-inline: 1rem;
+    margin-inline: auto;
+    max-width: 78rem;
+    padding-inline: 1.25rem;
   }
 
   @media (min-width: 768px) {
-    .container-lp { padding-inline: 0; }
+    .container-lp { padding-inline: 2.5rem; }
   }
 }
 

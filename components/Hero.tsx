@@ -6,7 +6,7 @@ import { whatsappUrl } from "@/lib/site";
 
 export function Hero() {
   return (
-    <section className="container-lp pt-10 pb-16 md:pt-14 md:pb-20" id="topo">
+    <section className="container-lp pt-8 pb-10 md:pt-10 md:pb-12" id="topo">
       <div className="grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr]">
         <Reveal>
           <h1 className="headline text-[4rem] leading-[0.88] sm:text-[6rem] lg:text-[7.5rem] xl:text-[8.5rem]">

@@ -29,7 +29,7 @@ export function ProjectShowcase({
     <section
       id={id}
       aria-labelledby="projetos-title"
-      className="container-lp scroll-mt-24 py-20 md:py-28"
+      className="container-lp scroll-mt-24 py-10 md:py-14"
     >
       <Reveal className="text-center">
         <h2 id="projetos-title" className="headline text-4xl sm:text-5xl lg:text-6xl">

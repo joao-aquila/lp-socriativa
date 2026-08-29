@@ -55,7 +55,7 @@ export default async function ProjetoPage({ params }: Params) {
       />
       <SiteHeader />
 
-      <main className="container-lp py-16 md:py-24">
+      <main className="container-lp py-10 md:py-14">
         <nav aria-label="Trilha de navegação" className="text-sm text-paper/60">
           <Link href="/" className="underline underline-offset-4">
             início

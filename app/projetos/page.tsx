@@ -39,7 +39,7 @@ export default async function ProjetosPage() {
       />
       <SiteHeader />
 
-      <main className="container-lp py-16 md:py-24">
+      <main className="container-lp py-10 md:py-14">
         <h1 className="headline text-5xl sm:text-6xl lg:text-7xl">
           projetos entregues
         </h1>
@@ -53,7 +53,7 @@ export default async function ProjetosPage() {
             key={section.category}
             id={section.category}
             aria-labelledby={`${section.category}-heading`}
-            className="scroll-mt-24 pt-16"
+            className="scroll-mt-24 pt-10"
           >
             <h2
               id={`${section.category}-heading`}

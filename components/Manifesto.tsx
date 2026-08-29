@@ -6,7 +6,7 @@ export function Manifesto() {
     <section
       id="sobre"
       aria-labelledby="manifesto-title"
-      className="container-lp scroll-mt-24 py-20 text-center md:py-28"
+      className="container-lp scroll-mt-24 py-10 text-center md:py-14"
     >
       <Reveal>
       <h2
