@@ -9,7 +9,7 @@ import { FinalCta } from "@/components/FinalCta";
 import { Faq } from "@/components/Faq";
 import { SiteFooter } from "@/components/SiteFooter";
 import { JsonLd } from "@/components/JsonLd";
-import { getFeaturedAll } from "@/lib/projects";
+import { getFeatured } from "@/lib/projects";
 import { faqSchema, organizationSchema, websiteSchema } from "@/lib/schema";
 import { site } from "@/lib/site";
 
@@ -20,7 +20,10 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const projects = await getFeaturedAll(6);
+  const [conteudo, identidade] = await Promise.all([
+    getFeatured("conteudo"),
+    getFeatured("identidade"),
+  ]);
 
   return (
     <>
@@ -34,10 +37,24 @@ export default async function HomePage() {
           id="projetos"
           title="projetos entregues"
           subtitle="um pouquinho do que já saiu daqui"
-          projects={projects}
-          cardAspect="square"
-          ctaHref="/projetos"
-          ctaLabel="ver todos os projetos"
+          rows={[
+            {
+              label: "conteúdos entregues",
+              projects: conteudo,
+              cardAspect: "portrait",
+              ctaHref: "/projetos#conteudo",
+              ctaLabel: "veja mais conteúdos",
+              emptyLabel: "novos conteúdos chegando por aqui",
+            },
+            {
+              label: "identidades visuais entregues",
+              projects: identidade,
+              cardAspect: "landscape",
+              ctaHref: "/projetos#identidade",
+              ctaLabel: "veja mais identidades",
+              emptyLabel: "novas identidades chegando por aqui",
+            },
+          ]}
         />
         <Process />
         <Faq />

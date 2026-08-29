@@ -3,28 +3,24 @@ import { ProjectCard } from "./ProjectCard";
 import { Reveal } from "./Reveal";
 import type { Project } from "@/lib/types";
 
+type Row = {
+  /** rótulo acessível da fileira — não aparece na tela */
+  label: string;
+  projects: Project[];
+  ctaLabel: string;
+  ctaHref: string;
+  cardAspect?: Project["aspect"];
+  emptyLabel?: string;
+};
+
 type Props = {
   id?: string;
   title: string;
   subtitle?: string;
-  projects: Project[];
-  ctaLabel: string;
-  ctaHref: string;
-  emptyLabel?: string;
-  /** proporção única para todos os cards da grade */
-  cardAspect?: Project["aspect"];
+  rows: Row[];
 };
 
-export function ProjectShowcase({
-  id,
-  title,
-  subtitle,
-  projects,
-  ctaLabel,
-  ctaHref,
-  emptyLabel = "novos projetos chegando por aqui",
-  cardAspect,
-}: Props) {
+export function ProjectShowcase({ id, title, subtitle, rows }: Props) {
   return (
     <section
       id={id}
@@ -40,28 +36,32 @@ export function ProjectShowcase({
         ) : null}
       </Reveal>
 
-      {projects.length ? (
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project, index) => (
-            <Reveal key={project.slug} delay={(index % 3) * 90}>
-              <ProjectCard project={project} aspect={cardAspect} />
-            </Reveal>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-10 rounded-card border-2 border-dashed border-paper/25 p-10 text-center text-paper/50">
-          {emptyLabel}
-        </p>
-      )}
+      {rows.map((row) => (
+        <div key={row.label} className="mt-10">
+          {row.projects.length ? (
+            <ul aria-label={row.label} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {row.projects.map((project, index) => (
+                <Reveal as="li" key={project.slug} delay={(index % 3) * 90}>
+                  <ProjectCard project={project} aspect={row.cardAspect} />
+                </Reveal>
+              ))}
+            </ul>
+          ) : (
+            <p className="rounded-card border-2 border-dashed border-paper/25 p-10 text-center text-paper/50">
+              {row.emptyLabel ?? "novos projetos chegando por aqui"}
+            </p>
+          )}
 
-      <Reveal className="mt-8 text-right">
-        <Link
-          href={ctaHref}
-          className="text-lg font-medium underline decoration-2 underline-offset-4 transition hover:text-white md:text-xl"
-        >
-          {ctaLabel} <span aria-hidden="true">↗</span>
-        </Link>
-      </Reveal>
+          <Reveal className="mt-5 text-right">
+            <Link
+              href={row.ctaHref}
+              className="text-lg font-medium underline decoration-2 underline-offset-4 transition hover:text-white md:text-xl"
+            >
+              {row.ctaLabel} <span aria-hidden="true">↗</span>
+            </Link>
+          </Reveal>
+        </div>
+      ))}
     </section>
   );
 }

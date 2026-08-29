@@ -28,9 +28,9 @@ export async function getProjectsByCategory(category: ProjectCategory) {
   return (await readProjects()).filter((p) => p.category === category);
 }
 
-/** Destaques de todas as categorias, para a vitrine única da home. */
-export async function getFeaturedAll(limit = 6) {
-  const all = await readProjects();
+/** Destaques de uma categoria, para as fileiras da home. */
+export async function getFeatured(category: ProjectCategory, limit = 3) {
+  const all = await getProjectsByCategory(category);
   const featured = all.filter((p) => p.featured);
   return (featured.length ? featured : all).slice(0, limit);
 }
