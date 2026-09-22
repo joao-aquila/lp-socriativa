@@ -104,11 +104,6 @@ export function SiteFooter() {
             © {new Date().getFullYear()} {site.legalName}. todos os direitos
             reservados.
           </p>
-          <p className="flex items-center gap-2">
-            feito com direção
-            <Star className="size-3 text-paper/40" />
-            atendimento online para todo o Brasil
-          </p>
         </div>
       </div>
     </footer>

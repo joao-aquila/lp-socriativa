@@ -17,13 +17,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/joao-aquila/lp-socriativa/issues"
   },
   "homepage": "https://github.com/joao-aquila/lp-socriativa#readme",
   "dependencies": {
-    "next": "^15.5.24",
+    "next": "^16.3.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "server-only": "^0.0.1"

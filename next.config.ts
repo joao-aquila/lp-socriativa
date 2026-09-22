@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  experimental: {
+    // o painel envia a imagem do projeto junto com o formulário
+    serverActions: { bodySizeLimit: "8mb" },
+  },
 };
 
 export default nextConfig;

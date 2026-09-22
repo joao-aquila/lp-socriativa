@@ -10,9 +10,20 @@ import {
   isValidSession,
 } from "@/lib/auth";
 import { readProjects, writeProjects } from "@/lib/projects";
+import type { CommitFile } from "@/lib/github";
 import type { Project, ProjectCategory } from "@/lib/types";
 
 const CATEGORIES: ProjectCategory[] = ["conteudo", "identidade", "design"];
+
+/** Onde as imagens do portfólio moram dentro do repositório. */
+const IMAGE_DIR = "images/portfolio";
+const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+const IMAGE_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/avif": "avif",
+};
 
 async function requireSession() {
   const store = await cookies();
@@ -36,6 +47,11 @@ function refresh() {
   revalidatePath("/projetos");
   revalidatePath("/admin");
   revalidatePath("/sitemap.xml");
+}
+
+/** Caminho gerenciado pelo painel (o que podemos apagar com segurança). */
+function isManagedImage(src?: string) {
+  return Boolean(src?.startsWith(`/${IMAGE_DIR}/`));
 }
 
 export async function login(_state: string | null, formData: FormData) {
@@ -80,12 +96,38 @@ export async function saveProject(_state: string | null, formData: FormData) {
   );
   if (duplicated) return "já existe um projeto com esse slug";
 
+  const previous = projects.find((p) => p.slug === originalSlug);
+  const files: CommitFile[] = [];
+
+  // imagem enviada pelo painel vence o campo de texto (que aceita URL externa)
+  let image = String(formData.get("image") ?? "").trim() || undefined;
+  const upload = formData.get("imageFile");
+
+  if (upload instanceof File && upload.size > 0) {
+    const extension = IMAGE_TYPES[upload.type];
+    if (!extension) return "formato de imagem inválido — use jpg, png, webp ou avif";
+    if (upload.size > MAX_IMAGE_BYTES) return "imagem muito grande — o limite é 6 MB";
+
+    const target = `${IMAGE_DIR}/${slug}.${extension}`;
+    files.push({
+      path: `public/${target}`,
+      content: Buffer.from(await upload.arrayBuffer()).toString("base64"),
+      encoding: "base64",
+    });
+    image = `/${target}`;
+  }
+
+  // a imagem antiga vira lixo quando é substituída ou quando o slug muda
+  if (isManagedImage(previous?.image) && previous?.image !== image) {
+    files.push({ path: `public${previous!.image}`, delete: true });
+  }
+
   const project: Project = {
     slug,
     title,
     client,
     category,
-    image: String(formData.get("image") ?? "").trim() || undefined,
+    image,
     aspect:
       (String(formData.get("aspect") ?? "portrait") as Project["aspect"]) ??
       "portrait",
@@ -95,6 +137,7 @@ export async function saveProject(_state: string | null, formData: FormData) {
     featured: formData.get("featured") === "on",
     publishedAt:
       String(formData.get("publishedAt") ?? "").trim() ||
+      previous?.publishedAt ||
       new Date().toISOString().slice(0, 10),
   };
 
@@ -102,16 +145,37 @@ export async function saveProject(_state: string | null, formData: FormData) {
     ? projects.map((p) => (p.slug === originalSlug ? project : p))
     : [...projects, project];
 
-  await writeProjects(next);
+  try {
+    await writeProjects(next, {
+      files,
+      message: `content: ${originalSlug ? "atualiza" : "adiciona"} projeto "${title}"`,
+    });
+  } catch (error) {
+    console.error(error);
+    return "não consegui publicar agora. tente de novo em alguns segundos.";
+  }
+
   refresh();
-  redirect("/admin");
+  redirect("/admin?publicado=1");
 }
 
 export async function deleteProject(formData: FormData) {
   await requireSession();
+
   const slug = String(formData.get("slug") ?? "");
   const projects = await readProjects();
-  await writeProjects(projects.filter((p) => p.slug !== slug));
+  const target = projects.find((p) => p.slug === slug);
+  if (!target) redirect("/admin");
+
+  const files: CommitFile[] = isManagedImage(target.image)
+    ? [{ path: `public${target.image}`, delete: true }]
+    : [];
+
+  await writeProjects(
+    projects.filter((p) => p.slug !== slug),
+    { files, message: `content: remove projeto "${target.title}"` },
+  );
+
   refresh();
-  redirect("/admin");
+  redirect("/admin?publicado=1");
 }
