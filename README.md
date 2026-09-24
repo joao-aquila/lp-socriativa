@@ -63,7 +63,8 @@ Cadastrar, editar, ocultar, excluir e reordenar projetos sem mexer em código.
   cabeçalho `Cf-Access-Jwt-Assertion` (assinatura, `iss` do time e `aud` da
   aplicação) em `lib/access.ts`. Sem `CF_ACCESS_TEAM_DOMAIN`/`CF_ACCESS_AUD`
   configurados, o painel fica fechado — exceto no `next dev`.
-  `ADMIN_EMAILS` (opcional) restringe ainda mais.
+  `ADMIN_EMAILS` (opcional, secret do Worker: `npx wrangler secret put ADMIN_EMAILS`)
+  restringe ainda mais.
 - `*.workers.dev` e as URLs de preview estão desligados no `wrangler.jsonc`:
   o Worker só responde pelo domínio próprio, que passa pelo Access.
 - Upload valida o tipo pelos bytes do arquivo (jpg, png, webp, avif), até 6 MB.

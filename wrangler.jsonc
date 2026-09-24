@@ -34,7 +34,7 @@
       "binding": "DB",
       "database_name": "portfolio-db",
       // saída de `npx wrangler d1 create portfolio-db`
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "947d2a80-bca6-4789-98da-6bf24b834bde",
       "migrations_dir": "migrations"
     }
   ],
@@ -56,11 +56,11 @@
     // domínio próprio do bucket R2; vazio => imagens servidas por /media/*
     "IMAGES_BASE_URL": "https://img.socriativaestudio.com.br",
     // Zero Trust > Settings > Custom Pages: https://<time>.cloudflareaccess.com
-    "CF_ACCESS_TEAM_DOMAIN": "",
+    "CF_ACCESS_TEAM_DOMAIN": "https://little-field-cb15.cloudflareaccess.com",
     // Zero Trust > Access > Applications > (app do /admin) > Application Audience (AUD) Tag
-    "CF_ACCESS_AUD": "",
-    // lista separada por vírgula; reforça a policy do Access
-    "ADMIN_EMAILS": ""
+    "CF_ACCESS_AUD": "f55cf01199f5285b67a9006244def5d4500292f36100a1d6ea827652294398a5"
+    // ADMIN_EMAILS (e-mails separados por vírgula, reforça a policy do Access)
+    // é secret, fora do repositório: `npx wrangler secret put ADMIN_EMAILS`
   },
 
   "observability": { "enabled": true }
