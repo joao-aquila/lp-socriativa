@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [conteudo, identidade] = await Promise.all([
     getFeatured("conteudo"),

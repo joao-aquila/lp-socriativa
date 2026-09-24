@@ -8,7 +8,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:migrate:local": "wrangler d1 migrations apply portfolio-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply portfolio-db --remote"
   },
   "repository": {
     "type": "git",
@@ -22,6 +28,8 @@
   },
   "homepage": "https://github.com/joao-aquila/lp-socriativa#readme",
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.6",
+    "jose": "^6.2.12",
     "next": "^16.3.5",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -34,7 +42,8 @@
     "@types/react-dom": "^19.2.5",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "wrangler": "^4.138.0"
   },
   "private": true
 }

@@ -5,15 +5,13 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { MediaFrame } from "@/components/MediaFrame";
 import { JsonLd } from "@/components/JsonLd";
-import { getProject, readProjects, categoryLabel } from "@/lib/projects";
-import { publicAsset } from "@/lib/media";
+import { getProject, categoryLabel } from "@/lib/projects";
 import { breadcrumbSchema, projectSchema } from "@/lib/schema";
 
 type Params = { params: Promise<{ slug: string }> };
 
-export async function generateStaticParams() {
-  return (await readProjects()).map((project) => ({ slug: project.slug }));
-}
+// lê do D1 a cada request: o que é publicado no painel aparece na hora
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
@@ -68,9 +66,9 @@ export default async function ProjetoPage({ params }: Params) {
 
         <article className="mt-8 grid gap-10 md:grid-cols-2 md:items-start">
           <MediaFrame
-            src={publicAsset(project.image)}
+            src={project.image ?? null}
             alt={`${project.title} — projeto para ${project.client}`}
-            aspect={project.aspect ?? "portrait"}
+            aspect={project.aspect}
             fallbackLabel="arte em breve"
             sizes="(max-width: 768px) 100vw, 50vw"
             priority

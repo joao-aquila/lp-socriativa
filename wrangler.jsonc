@@ -1,0 +1,67 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "socriativa",
+  "main": "worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  // *.workers.dev e as URLs de preview não passam pelo Cloudflare Access:
+  // o site só responde pelo domínio próprio.
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "socriativaestudio.com.br", "custom_domain": true },
+    // os demais redirecionam para o principal (worker.ts)
+    { "pattern": "www.socriativaestudio.com.br", "custom_domain": true },
+    { "pattern": "socriativaestudio.com", "custom_domain": true },
+    { "pattern": "www.socriativaestudio.com", "custom_domain": true }
+  ],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "socriativa"
+    }
+  ],
+
+  // projetos do portfólio (SQLite gerenciado)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "portfolio-db",
+      // saída de `npx wrangler d1 create portfolio-db`
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // artes do portfólio, servidas por img.socriativaestudio.com.br
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "portfolio-images"
+    }
+  ],
+
+  // otimização do next/image (Cloudflare Images)
+  "images": {
+    "binding": "IMAGES"
+  },
+
+  "vars": {
+    // domínio próprio do bucket R2; vazio => imagens servidas por /media/*
+    "IMAGES_BASE_URL": "https://img.socriativaestudio.com.br",
+    // Zero Trust > Settings > Custom Pages: https://<time>.cloudflareaccess.com
+    "CF_ACCESS_TEAM_DOMAIN": "",
+    // Zero Trust > Access > Applications > (app do /admin) > Application Audience (AUD) Tag
+    "CF_ACCESS_AUD": "",
+    // lista separada por vírgula; reforça a policy do Access
+    "ADMIN_EMAILS": ""
+  },
+
+  "observability": { "enabled": true }
+}

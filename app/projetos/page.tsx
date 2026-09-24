@@ -15,6 +15,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/projetos" },
 };
 
+export const dynamic = "force-dynamic";
+
 const sections: { category: ProjectCategory; title: string }[] = [
   { category: "conteudo", title: "conteúdos entregues" },
   { category: "identidade", title: "identidades visuais" },

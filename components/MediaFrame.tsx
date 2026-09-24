@@ -41,6 +41,9 @@ export function MediaFrame({
           fill
           sizes={sizes}
           priority={priority}
+          // /media/* é uma rota do app, não um asset estático: o otimizador do
+          // Worker não alcança, então vai sem transformação
+          unoptimized={src.startsWith("/media/")}
           className="object-cover"
         />
       ) : (

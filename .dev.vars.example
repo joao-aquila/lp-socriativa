@@ -1,0 +1,12 @@
+# Sobrescreve os "vars" do wrangler.jsonc no `npm run dev` / `npm run preview`.
+NEXTJS_ENV=development
+
+# vazio => imagens servidas pelo próprio app em /media/* (R2 local)
+IMAGES_BASE_URL=
+
+# vazio => no `next dev` o painel abre sem login (nunca em produção)
+CF_ACCESS_TEAM_DOMAIN=
+CF_ACCESS_AUD=
+
+# reforço da policy do Access (lista separada por vírgula)
+ADMIN_EMAILS=

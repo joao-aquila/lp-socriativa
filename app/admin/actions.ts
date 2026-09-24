@@ -1,36 +1,23 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getAdmin, requireAdmin } from "@/lib/access";
+import { ImageError, deleteImage, putImage } from "@/lib/images";
 import {
-  SESSION_COOKIE,
-  checkPassword,
-  createSessionValue,
-  isValidSession,
-} from "@/lib/auth";
-import { readProjects, writeProjects } from "@/lib/projects";
-import type { CommitFile } from "@/lib/github";
-import type { Project, ProjectCategory } from "@/lib/types";
+  CATEGORIES,
+  deleteProjectRow,
+  getProjectById,
+  insertProject,
+  moveProject,
+  setProjectActive,
+  slugTaken,
+  updateProject,
+  type ProjectInput,
+} from "@/lib/projects";
+import type { ProjectAspect, ProjectCategory } from "@/lib/types";
 
-const CATEGORIES: ProjectCategory[] = ["conteudo", "identidade", "design"];
-
-/** Onde as imagens do portfólio moram dentro do repositório. */
-const IMAGE_DIR = "images/portfolio";
-const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
-const IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/avif": "avif",
-};
-
-async function requireSession() {
-  const store = await cookies();
-  if (!(await isValidSession(store.get(SESSION_COOKIE)?.value))) {
-    redirect("/admin/login");
-  }
-}
+const ASPECTS: ProjectAspect[] = ["portrait", "landscape", "square"];
 
 function slugify(value: string) {
   return value
@@ -42,140 +29,134 @@ function slugify(value: string) {
     .slice(0, 60);
 }
 
+function text(formData: FormData, name: string) {
+  return String(formData.get(name) ?? "").trim();
+}
+
+function optionalId(formData: FormData) {
+  const id = Number(formData.get("id"));
+  return Number.isInteger(id) && id > 0 ? id : null;
+}
+
+function isHttpUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 function refresh() {
-  revalidatePath("/");
-  revalidatePath("/projetos");
-  revalidatePath("/admin");
-  revalidatePath("/sitemap.xml");
-}
-
-/** Caminho gerenciado pelo painel (o que podemos apagar com segurança). */
-function isManagedImage(src?: string) {
-  return Boolean(src?.startsWith(`/${IMAGE_DIR}/`));
-}
-
-export async function login(_state: string | null, formData: FormData) {
-  const password = String(formData.get("password") ?? "");
-  if (!checkPassword(password)) return "senha incorreta";
-
-  const { value, maxAge } = await createSessionValue();
-  (await cookies()).set(SESSION_COOKIE, value, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge,
-  });
-
-  const redirectTo = String(formData.get("redirect") ?? "/admin");
-  redirect(redirectTo.startsWith("/admin") ? redirectTo : "/admin");
-}
-
-export async function logout() {
-  (await cookies()).delete(SESSION_COOKIE);
-  redirect("/admin/login");
+  revalidatePath("/", "layout");
 }
 
 export async function saveProject(_state: string | null, formData: FormData) {
-  await requireSession();
+  if (!(await getAdmin())) return "sua sessão expirou — recarregue a página para entrar de novo";
 
-  const title = String(formData.get("title") ?? "").trim();
-  const client = String(formData.get("client") ?? "").trim();
-  const category = String(formData.get("category") ?? "") as ProjectCategory;
+  const id = optionalId(formData);
+  const title = text(formData, "title");
+  const client = text(formData, "client");
+  const category = text(formData, "category") as ProjectCategory;
+  const aspect = text(formData, "aspect") as ProjectAspect;
+  const description = text(formData, "description");
+  const href = text(formData, "href");
 
   if (!title || !client) return "título e cliente são obrigatórios";
+  if (title.length > 200 || client.length > 120) return "título ou cliente longo demais";
+  if (description.length > 1000) return "a descrição passa de 1000 caracteres";
   if (!CATEGORIES.includes(category)) return "categoria inválida";
+  if (!ASPECTS.includes(aspect)) return "proporção inválida";
+  if (href && !isHttpUrl(href)) return "o link externo precisa começar com https://";
 
-  const originalSlug = String(formData.get("originalSlug") ?? "").trim();
-  const slug = slugify(String(formData.get("slug") ?? "") || title);
+  const slug = slugify(text(formData, "slug") || title);
   if (!slug) return "não consegui gerar um slug a partir do título";
+  if (await slugTaken(slug, id ?? undefined)) return "já existe um projeto com esse slug";
 
-  const projects = await readProjects();
-  const duplicated = projects.some(
-    (p) => p.slug === slug && p.slug !== originalSlug,
-  );
-  if (duplicated) return "já existe um projeto com esse slug";
+  const previous = id ? await getProjectById(id) : null;
+  if (id && !previous) return "esse projeto não existe mais — recarregue a página";
 
-  const previous = projects.find((p) => p.slug === originalSlug);
-  const files: CommitFile[] = [];
+  let imageKey = formData.get("removeImage") === "on" ? null : (previous?.imageKey ?? null);
+  let uploadedKey: string | null = null;
 
-  // imagem enviada pelo painel vence o campo de texto (que aceita URL externa)
-  let image = String(formData.get("image") ?? "").trim() || undefined;
   const upload = formData.get("imageFile");
-
   if (upload instanceof File && upload.size > 0) {
-    const extension = IMAGE_TYPES[upload.type];
-    if (!extension) return "formato de imagem inválido — use jpg, png, webp ou avif";
-    if (upload.size > MAX_IMAGE_BYTES) return "imagem muito grande — o limite é 6 MB";
-
-    const target = `${IMAGE_DIR}/${slug}.${extension}`;
-    files.push({
-      path: `public/${target}`,
-      content: Buffer.from(await upload.arrayBuffer()).toString("base64"),
-      encoding: "base64",
-    });
-    image = `/${target}`;
+    try {
+      uploadedKey = await putImage(slug, upload);
+      imageKey = uploadedKey;
+    } catch (error) {
+      if (error instanceof ImageError) return error.message;
+      console.error(error);
+      return "não consegui enviar a imagem. tente de novo em alguns segundos.";
+    }
   }
 
-  // a imagem antiga vira lixo quando é substituída ou quando o slug muda
-  if (isManagedImage(previous?.image) && previous?.image !== image) {
-    files.push({ path: `public${previous!.image}`, delete: true });
-  }
-
-  const project: Project = {
+  const input: ProjectInput = {
     slug,
     title,
     client,
     category,
-    image,
-    aspect:
-      (String(formData.get("aspect") ?? "portrait") as Project["aspect"]) ??
-      "portrait",
-    description: String(formData.get("description") ?? "").trim() || undefined,
-    href: String(formData.get("href") ?? "").trim() || undefined,
-    order: Number(formData.get("order") ?? 0) || undefined,
+    aspect,
+    description: description || null,
+    href: href || null,
+    imageKey,
     featured: formData.get("featured") === "on",
-    publishedAt:
-      String(formData.get("publishedAt") ?? "").trim() ||
-      previous?.publishedAt ||
-      new Date().toISOString().slice(0, 10),
+    active: formData.get("active") === "on",
+    publishedAt: previous?.publishedAt ?? new Date().toISOString().slice(0, 10),
   };
 
-  const next = originalSlug
-    ? projects.map((p) => (p.slug === originalSlug ? project : p))
-    : [...projects, project];
-
   try {
-    await writeProjects(next, {
-      files,
-      message: `content: ${originalSlug ? "atualiza" : "adiciona"} projeto "${title}"`,
-    });
+    if (previous) await updateProject(previous.id, input);
+    else await insertProject(input);
   } catch (error) {
+    // o projeto não foi salvo: a imagem recém-enviada ficaria órfã
+    await deleteImage(uploadedKey);
     console.error(error);
-    return "não consegui publicar agora. tente de novo em alguns segundos.";
+    return String(error).includes("UNIQUE")
+      ? "já existe um projeto com esse slug"
+      : "não consegui salvar agora. tente de novo em alguns segundos.";
+  }
+
+  // só depois de salvo: a arte antiga deixa de ser referenciada
+  if (previous?.imageKey && previous.imageKey !== imageKey) {
+    await deleteImage(previous.imageKey);
   }
 
   refresh();
-  redirect("/admin?publicado=1");
+  redirect(`/admin?categoria=${category}&ok=${previous ? "salvo" : "criado"}`);
 }
 
 export async function deleteProject(formData: FormData) {
-  await requireSession();
+  await requireAdmin();
 
-  const slug = String(formData.get("slug") ?? "");
-  const projects = await readProjects();
-  const target = projects.find((p) => p.slug === slug);
+  const id = optionalId(formData);
+  const target = id ? await getProjectById(id) : null;
   if (!target) redirect("/admin");
 
-  const files: CommitFile[] = isManagedImage(target.image)
-    ? [{ path: `public${target.image}`, delete: true }]
-    : [];
-
-  await writeProjects(
-    projects.filter((p) => p.slug !== slug),
-    { files, message: `content: remove projeto "${target.title}"` },
-  );
+  await deleteProjectRow(target.id);
+  await deleteImage(target.imageKey);
 
   refresh();
-  redirect("/admin?publicado=1");
+  redirect(`/admin?categoria=${target.category}&ok=removido`);
+}
+
+export async function reorderProject(formData: FormData) {
+  await requireAdmin();
+
+  const id = optionalId(formData);
+  const direction = formData.get("direction");
+  if (!id || (direction !== "up" && direction !== "down")) return;
+
+  await moveProject(id, direction);
+  refresh();
+}
+
+export async function toggleProjectActive(formData: FormData) {
+  await requireAdmin();
+
+  const id = optionalId(formData);
+  if (!id) return;
+
+  await setProjectActive(id, formData.get("active") === "1");
+  refresh();
 }

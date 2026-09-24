@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { MediaFrame } from "./MediaFrame";
-import { publicAsset } from "@/lib/media";
 import { categoryLabel } from "@/lib/projects";
 import type { Project } from "@/lib/types";
 
@@ -14,7 +13,7 @@ export function ProjectCard({
   /** força uma proporção única — usado nas grades mistas, para alinhar os cards */
   aspect?: Project["aspect"];
 }) {
-  const src = publicAsset(project.image);
+  const src = project.image ?? null;
 
   return (
     <article className="group relative overflow-hidden rounded-card bg-ink">

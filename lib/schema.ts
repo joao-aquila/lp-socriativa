@@ -65,7 +65,9 @@ export const projectSchema = (project: Project) => ({
   url: `${siteUrl}/projetos/${project.slug}`,
   about: project.client,
   creator: { "@id": `${siteUrl}/#organization` },
-  ...(project.image ? { image: `${siteUrl}${project.image}` } : {}),
+  ...(project.image
+    ? { image: project.image.startsWith("/") ? `${siteUrl}${project.image}` : project.image }
+    : {}),
   ...(project.publishedAt ? { datePublished: project.publishedAt } : {}),
 });
 

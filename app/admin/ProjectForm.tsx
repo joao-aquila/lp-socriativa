@@ -1,205 +1,219 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { saveProject } from "./actions";
-import { ImageField } from "./ImageField";
-import { buttonGhost, buttonPrimary, field, hint, label } from "./ui";
-import type { Project } from "@/lib/types";
+import { MediaField } from "./MediaField";
+import { buttonGhost, buttonPrimary, field, hint, label, panel, panelTitle } from "./ui";
+import type { Project, ProjectCategory } from "@/lib/types";
 
-function Fieldset({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}) {
+const categories: { value: ProjectCategory; label: string }[] = [
+  { value: "conteudo", label: "conteúdo" },
+  { value: "identidade", label: "identidade visual" },
+  { value: "design", label: "design" },
+];
+
+const DESCRIPTION_MAX = 1000;
+
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <fieldset className="border-t border-paper/12 pt-7">
-      <legend className="sr-only">{title}</legend>
-      <div className="grid gap-6 lg:grid-cols-[14rem_1fr]">
-        <div>
-          <h3 className="font-bold">{title}</h3>
-          {description ? (
-            <p className="mt-1 text-sm text-paper/50">{description}</p>
-          ) : null}
-        </div>
-        <div className="grid gap-5">{children}</div>
-      </div>
-    </fieldset>
+    <section className={`${panel} p-5 sm:p-7`}>
+      <h2 className={panelTitle}>{title}</h2>
+      <div className="mt-6 grid gap-6">{children}</div>
+    </section>
   );
 }
 
-export function ProjectForm({ project }: { project?: Project }) {
+function Switch({
+  name,
+  defaultChecked,
+  title,
+  description,
+}: {
+  name: string;
+  defaultChecked: boolean;
+  title: string;
+  description: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-start justify-between gap-4">
+      <span>
+        <span className="block text-sm font-medium text-paper/85">{title}</span>
+        <span className="mt-1 block text-xs leading-relaxed text-paper/45">{description}</span>
+      </span>
+      <input type="checkbox" name={name} defaultChecked={defaultChecked} className="peer sr-only" />
+      <span
+        aria-hidden="true"
+        className="relative mt-0.5 h-6 w-11 shrink-0 rounded-full border border-paper/25 transition-colors peer-checked:border-paper peer-checked:bg-paper peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-paper [&>span]:left-1 [&>span]:bg-paper/50 peer-checked:[&>span]:left-[1.4rem] peer-checked:[&>span]:bg-ink"
+      >
+        <span className="absolute top-1/2 size-4 -translate-y-1/2 rounded-full transition-[left,background-color] duration-200" />
+      </span>
+    </label>
+  );
+}
+
+export function ProjectForm({
+  project,
+  defaultCategory = "conteudo",
+}: {
+  project?: Project;
+  defaultCategory?: ProjectCategory;
+}) {
   const [error, formAction, pending] = useActionState<string | null, FormData>(
     saveProject,
     null,
   );
+  const [description, setDescription] = useState(project?.description ?? "");
+  const backHref = `/admin?categoria=${project?.category ?? defaultCategory}`;
 
   return (
-    <form action={formAction} className="grid gap-8">
-      <input type="hidden" name="originalSlug" defaultValue={project?.slug ?? ""} />
+    <form action={formAction}>
+      {project ? <input type="hidden" name="id" value={project.id} /> : null}
 
-      <Fieldset title="o projeto" description="o que aparece no card e na página.">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block">
-            <span className={label}>título *</span>
-            <input
-              name="title"
-              required
-              defaultValue={project?.title}
-              placeholder="quem é a natália fora da versão psicóloga?"
-              className={field}
-            />
-          </label>
+      <div className="grid gap-5 lg:grid-cols-[1fr_20rem] lg:items-start">
+        <div className="grid gap-5">
+          <Panel title="sobre o projeto">
+            <label className="block">
+              <span className={label}>título</span>
+              <input
+                name="title"
+                required
+                maxLength={200}
+                defaultValue={project?.title}
+                placeholder="quem é a natália fora da versão psicóloga?"
+                className={`${field} text-lg font-bold`}
+              />
+            </label>
 
-          <label className="block">
-            <span className={label}>cliente / nicho *</span>
-            <input
-              name="client"
-              required
-              defaultValue={project?.client}
-              placeholder="psicologia"
-              className={field}
-            />
-            <span className={hint}>é o texto em destaque no card.</span>
-          </label>
+            <label className="block">
+              <span className={label}>cliente / nicho</span>
+              <input
+                name="client"
+                required
+                maxLength={120}
+                defaultValue={project?.client}
+                placeholder="psicologia"
+                className={field}
+              />
+              <span className={hint}>aparece em destaque no card, acima do título.</span>
+            </label>
+
+            <fieldset>
+              <legend className={label}>categoria</legend>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {categories.map((option) => (
+                  <label
+                    key={option.value}
+                    className="cursor-pointer rounded-full px-4 py-2 text-sm font-medium text-paper/60 ring-1 ring-paper/15 transition-colors hover:text-paper hover:ring-paper/40 has-checked:bg-paper has-checked:text-ink has-checked:ring-paper has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-paper"
+                  >
+                    <input
+                      type="radio"
+                      name="category"
+                      value={option.value}
+                      defaultChecked={(project?.category ?? defaultCategory) === option.value}
+                      className="sr-only"
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+              {project ? (
+                <span className={hint}>trocar de categoria leva o projeto para o fim da lista nova.</span>
+              ) : null}
+            </fieldset>
+
+            <label className="block">
+              <span className="flex items-baseline justify-between">
+                <span className={label}>descrição</span>
+                <span
+                  className={`text-xs tabular-nums ${
+                    description.length > DESCRIPTION_MAX * 0.9 ? "text-paper/70" : "text-paper/30"
+                  }`}
+                >
+                  {description.length}/{DESCRIPTION_MAX}
+                </span>
+              </span>
+              <textarea
+                name="description"
+                rows={4}
+                maxLength={DESCRIPTION_MAX}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="uma ou duas frases sobre o que foi feito."
+                className={`${field} resize-y`}
+              />
+              <span className={hint}>usada na página do projeto e no Google.</span>
+            </label>
+          </Panel>
+
+          <Panel title="link e endereço">
+            <label className="block">
+              <span className={label}>link externo</span>
+              <input
+                name="href"
+                type="url"
+                defaultValue={project?.href}
+                placeholder="https://instagram.com/p/…"
+                className={field}
+              />
+              <span className={hint}>post, perfil ou Behance. opcional.</span>
+            </label>
+
+            <label className="block">
+              <span className={label}>endereço da página</span>
+              <span className="mt-2 flex items-center overflow-hidden rounded-xl border border-paper/15 bg-ink/60 transition-colors focus-within:border-paper/70 hover:border-paper/30">
+                <span className="shrink-0 pl-4 text-paper/35">/projetos/</span>
+                <input
+                  name="slug"
+                  defaultValue={project?.slug}
+                  placeholder="gerado a partir do título"
+                  className="w-full bg-transparent py-3 pr-4 pl-0.5 text-paper outline-none placeholder:text-paper/30"
+                />
+              </span>
+              {project ? (
+                <span className={hint}>mudar depois de publicado quebra links antigos.</span>
+              ) : null}
+            </label>
+          </Panel>
         </div>
 
-        <label className="block">
-          <span className={label}>categoria *</span>
-          <select
-            name="category"
-            defaultValue={project?.category ?? "conteudo"}
-            className={field}
-          >
-            <option value="conteudo">conteúdo</option>
-            <option value="identidade">identidade visual</option>
-            <option value="design">design</option>
-          </select>
-          <span className={hint}>define em qual seção de /projetos ele entra.</span>
-        </label>
+        <div className="grid gap-5 lg:sticky lg:top-24">
+          <Panel title="imagem">
+            <MediaField current={project?.image} aspect={project?.aspect ?? "portrait"} />
+          </Panel>
 
-        <label className="block">
-          <span className={label}>descrição</span>
-          <textarea
-            name="description"
-            rows={3}
-            defaultValue={project?.description}
-            placeholder="uma ou duas frases sobre o que foi feito."
-            className={field}
-          />
-          <span className={hint}>usada na página do projeto e no Google.</span>
-        </label>
-      </Fieldset>
-
-      <Fieldset title="imagem" description="a arte que ilustra o projeto.">
-        <ImageField current={project?.image} />
-
-        <label className="block sm:max-w-xs">
-          <span className={label}>proporção no card</span>
-          <select
-            name="aspect"
-            defaultValue={project?.aspect ?? "portrait"}
-            className={field}
-          >
-            <option value="portrait">retrato (3:4)</option>
-            <option value="landscape">paisagem (4:3)</option>
-            <option value="square">quadrada</option>
-          </select>
-        </label>
-      </Fieldset>
-
-      <Fieldset title="exibição" description="onde e como ele aparece no site.">
-        <label className="block">
-          <span className={label}>link externo</span>
-          <input
-            name="href"
-            type="url"
-            defaultValue={project?.href}
-            placeholder="https://instagram.com/p/…"
-            className={field}
-          />
-          <span className={hint}>
-            perfil, post ou projeto completo no Behance. deixe vazio se não houver.
-          </span>
-        </label>
-
-        <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block">
-            <span className={label}>ordem</span>
-            <input
-              name="order"
-              type="number"
-              min={0}
-              defaultValue={project?.order ?? 0}
-              className={field}
+          <Panel title="visibilidade">
+            <Switch
+              name="active"
+              defaultChecked={project?.active ?? true}
+              title="no ar"
+              description="desligado, o projeto some do site mas fica salvo aqui."
             />
-            <span className={hint}>menor aparece primeiro.</span>
-          </label>
-
-          <label className="flex items-start gap-3 sm:mt-8">
-            <input
-              type="checkbox"
+            <Switch
               name="featured"
               defaultChecked={project?.featured ?? true}
-              className="mt-0.5 size-5 shrink-0 accent-white"
+              title="destaque na home"
+              description="a home mostra até 3 destaques por categoria."
             />
-            <span>
-              <span className="text-sm font-medium text-paper/85">
-                destacar na home
-              </span>
-              <span className="mt-0.5 block text-xs text-paper/45">
-                projetos destacados abrem a fileira da categoria.
-              </span>
-            </span>
-          </label>
+          </Panel>
         </div>
+      </div>
 
-        <label className="block sm:max-w-md">
-          <span className={label}>slug</span>
-          <input
-            name="slug"
-            defaultValue={project?.slug}
-            placeholder="gerado a partir do título"
-            className={field}
-          />
-          <span className={hint}>
-            endereço da página: /projetos/<em>slug</em>. mudar depois de publicado
-            quebra o link antigo.
-          </span>
-        </label>
-      </Fieldset>
-
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-xl border border-red-400/35 bg-red-400/10 px-4 py-3 text-sm text-red-200"
-        >
-          {error}
-        </p>
-      ) : null}
-
-      <div className="flex flex-wrap items-center gap-3 border-t border-paper/12 pt-6">
-        <button type="submit" disabled={pending} className={buttonPrimary}>
-          {pending
-            ? "publicando…"
-            : project
-              ? "salvar alterações"
-              : "publicar projeto"}
-        </button>
-
-        {project ? (
-          <Link href="/admin" className={buttonGhost}>
+      {/* barra de ações fixa: salvar sempre à mão, mesmo no fim de um formulário longo */}
+      <div className="sticky bottom-0 z-20 -mx-5 mt-8 border-t border-paper/8 bg-night/85 px-5 py-4 backdrop-blur-md md:mx-0 md:rounded-t-2xl md:border-x md:px-6">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          {error ? (
+            <p role="alert" className="mr-auto text-sm text-red-300">
+              {error}
+            </p>
+          ) : null}
+          <Link href={backHref} className={buttonGhost}>
             cancelar
           </Link>
-        ) : null}
-
-        <span className="text-sm text-paper/45">
-          o site leva cerca de 40 segundos para atualizar.
-        </span>
+          <button type="submit" disabled={pending} className={buttonPrimary}>
+            {pending ? "salvando…" : project ? "salvar alterações" : "publicar projeto"}
+          </button>
+        </div>
       </div>
     </form>
   );

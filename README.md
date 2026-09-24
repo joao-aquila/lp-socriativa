@@ -1,74 +1,104 @@
 # lp-socriativa
 
-Landing page do estúdio criativo **Sô Criativa** — Next.js 15 (App Router), React 19, TypeScript e Tailwind v4.
+Landing page do estúdio criativo **Sô Criativa** — Next.js 16 (App Router), React 19, TypeScript e Tailwind v4, hospedada na Cloudflare (Workers via [OpenNext](https://opennext.js.org/cloudflare)).
 
 ## Rodando
 
 ```bash
-cp .env.example .env.local   # ajuste as variáveis
-npm run dev                  # http://localhost:3000
+npm install
+cp .env.example .env.local          # ajuste as variáveis
+cp .dev.vars.example .dev.vars      # overrides locais dos vars do Worker
+npm run db:migrate:local            # cria o D1 local com os projetos iniciais
+npm run dev                         # http://localhost:3000
 ```
 
-Scripts: `dev`, `build`, `start`, `typecheck`.
+No `next dev` os bindings `DB` (D1) e `BUCKET` (R2) são versões locais
+(`.wrangler/state`), e o `/admin` abre sem login.
+
+| Script | O quê |
+| --- | --- |
+| `dev` | Next em modo dev, com D1/R2 locais |
+| `preview` | build do Worker + `wrangler dev` (runtime real, porta 8787) |
+| `deploy` | build do Worker + deploy na Cloudflare |
+| `db:migrate:local` / `db:migrate:remote` | aplica `migrations/` no D1 |
+| `cf-typegen` | regenera `cloudflare-env.d.ts` após mudar o `wrangler.jsonc` |
+| `typecheck` | `tsc --noEmit` |
 
 ## Imagens
 
-Marca e mascote já estão no repositório (recortados e redimensionados a partir das artes originais):
+Marca e mascote ficam no repositório, em `public/images` (logotipo e
+mascotes) e `app/icon.png` / `app/apple-icon.png`.
 
-| O quê | Arquivo |
-| --- | --- |
-| Logotipo (variante clara, usada no fundo escuro) | `public/images/logo-horizontal-light.png` |
-| Logotipo original (tinta escura, para fundos claros) | `public/images/logo-horizontal.png` |
-| Mascote do hero | `public/images/mascote/selfie.png` |
-| Mascote do processo | `public/images/mascote/notebook.png` |
-| Mascote do CTA final | `public/images/mascote/microfone.png` |
-| Favicon / ícone iOS | `app/icon.png`, `app/apple-icon.png` |
+As artes do **portfólio** ficam no bucket R2 `portfolio-images`, enviadas pelo
+`/admin` com a chave `projects/<slug>-<id>.<ext>` (o sufixo muda a cada troca,
+então o cache é eterno). Em produção elas saem por `https://img.socriativaestudio.com.br`
+(domínio próprio do bucket: CDN e sem custo de saída). Sem `IMAGES_BASE_URL` — no
+`next dev` — o app serve o R2 local em `/media/*`. Sem imagem, o card mostra um
+placeholder tracejado do mesmo tamanho.
 
-Falta só o **portfólio**, e ele é alimentado pelo `/admin`: o upload manda a arte para `public/images/portfolio/<slug>.<ext>` e preenche o campo `image` sozinho. Sem `image`, o card mostra um placeholder tracejado do mesmo tamanho — nada quebra.
-
-`lib/media.ts` checa se o arquivo existe em `/public` antes de renderizar; se existir, o `next/image` assume no lugar do placeholder.
+O `next/image` usa o binding `IMAGES` (Cloudflare Images) para redimensionar.
 
 ## Conteúdo do portfólio
 
-Os projetos ficam em `content/projects.json` e são lidos por `lib/projects.ts`.
-Campos em `lib/types.ts`. Categorias: `conteudo`, `identidade`, `design`.
+Os projetos ficam na tabela `projects` do D1 (`portfolio-db`), lida por
+`lib/projects.ts` a cada request — o que é salvo no painel aparece no site na
+hora, sem rebuild. Schema em `migrations/0001_create_projects.sql`; os projetos
+iniciais em `0002_seed_projects.sql`. Campos em `lib/types.ts`. Categorias:
+`conteudo`, `identidade`, `design`. A ordem (`position`) é por categoria.
+
+Mudança de schema = nova migration em `migrations/` e
+`npm run db:migrate:remote`.
 
 ## Painel `/admin`
 
-Painel logado para cadastrar, editar e excluir projetos do portfólio sem mexer em código.
+Cadastrar, editar, ocultar, excluir e reordenar projetos sem mexer em código.
 
-- Login em `/admin/login` com `ADMIN_PASSWORD`.
-- Sessão = cookie httpOnly assinado com HMAC (`ADMIN_SESSION_SECRET`), válida por 8h.
-- `middleware.ts` bloqueia toda a rota `/admin`; as server actions revalidam a home, `/projetos` e o `sitemap.xml` a cada alteração.
+- `/admin`: lista por categoria, com a chave "no ar" (oculta o projeto do site
+  sem apagar), setas de ordem e o botão de novo projeto.
+- `/admin/novo` e `/admin/<id>`: formulário. A exclusão fica no fim da edição.
+
+- **Login:** Cloudflare Access (código de uso único por e-mail) na frente de
+  `/admin`. Não há senha no app.
+- **Defesa em profundidade:** a página e cada server action validam o JWT do
+  cabeçalho `Cf-Access-Jwt-Assertion` (assinatura, `iss` do time e `aud` da
+  aplicação) em `lib/access.ts`. Sem `CF_ACCESS_TEAM_DOMAIN`/`CF_ACCESS_AUD`
+  configurados, o painel fica fechado — exceto no `next dev`.
+  `ADMIN_EMAILS` (opcional) restringe ainda mais.
+- `*.workers.dev` e as URLs de preview estão desligados no `wrangler.jsonc`:
+  o Worker só responde pelo domínio próprio, que passa pelo Access.
+- Upload valida o tipo pelos bytes do arquivo (jpg, png, webp, avif), até 6 MB.
 - `/admin` é `noindex` e está no `Disallow` do `robots.txt`.
 
-### Publicação e persistência
+## Deploy (Cloudflare)
 
-O conteúdo é o próprio repositório: `content/projects.json` para os dados e
-`public/images/portfolio/` para as artes. A leitura (`readProjects`) é sempre do
-disco — como toda publicação gera um deploy, o JSON já vem embutido no build e
-nenhuma página faz chamada de rede.
+Uma vez só:
 
-A escrita depende do ambiente:
+1. **DNS:** adicione `socriativaestudio.com.br` e `socriativaestudio.com` na
+   Cloudflare (plano Free) e, na Hostinger, troque os nameservers de cada um
+   para os que a Cloudflare indicar (o registro continua na Hostinger). Se
+   houver DNSSEC ligado na Hostinger, desligue antes. Se usa e-mail da
+   Hostinger, confira se os registros MX foram importados.
+2. **Recursos** (o R2 exige cartão cadastrado, mesmo no plano grátis):
+   ```bash
+   npx wrangler login
+   npx wrangler d1 create portfolio-db        # copie o database_id para o wrangler.jsonc
+   npx wrangler r2 bucket create portfolio-images
+   npm run db:migrate:remote
+   ```
+3. **Domínio das imagens:** R2 > `portfolio-images` > Settings > Custom Domains >
+   `img.socriativaestudio.com.br`.
+4. **Deploy:** `npm run deploy` (ou Workers Builds conectado ao GitHub, com
+   build command `npx opennextjs-cloudflare build` e deploy command
+   `npx opennextjs-cloudflare deploy`). Os `routes` do `wrangler.jsonc` criam os
+   custom domains dos quatro endereços (com e sem `www`, `.com` e `.com.br`);
+   o `worker.ts` redireciona (301) todos para `socriativaestudio.com.br`.
+5. **Access:** Zero Trust > Access > Applications > Add > Self-hosted.
+   Domínio `socriativaestudio.com.br`, paths `admin` e `admin/*`; policy *Allow* com
+   *Emails* = o seu; login method *One-time PIN*. Depois copie:
+   - a *Application Audience (AUD) Tag* para `CF_ACCESS_AUD`;
+   - `https://<time>.cloudflareaccess.com` para `CF_ACCESS_TEAM_DOMAIN`
 
-| Ambiente | O que acontece |
-| --- | --- |
-| Desenvolvimento (sem `GITHUB_TOKEN`) | grava direto no repositório local; você commita quando quiser |
-| Produção | um commit na branch configurada, via Git Data API (`lib/github.ts`) |
-
-O JSON e a imagem entram no **mesmo commit**, então cada publicação dispara um
-único rebuild. O site reflete a mudança em cerca de 40 segundos.
-
-Vantagem: nada para hospedar, nada que hiberne ou expire, e histórico completo do
-que foi publicado — dá para reverter qualquer alteração pelo git.
-
-**Token:** GitHub > Settings > Developer settings > Personal access tokens >
-Fine-grained, com escopo restrito a este repositório e permissão
-*Contents: Read and write*. Configure `GITHUB_TOKEN`, `GITHUB_REPO` e
-`GITHUB_BRANCH` no ambiente de produção.
-
-Se um dia o volume crescer a ponto do rebuild incomodar, só `readProjects` e
-`writeProjects` mudam de lugar. Nenhum componente precisa saber.
+   (em `vars` no `wrangler.jsonc`) e faça o deploy de novo.
 
 ## SEO
 
@@ -76,7 +106,7 @@ Se um dia o volume crescer a ponto do rebuild incomodar, só `readProjects` e
 - `app/opengraph-image.tsx` gera a imagem social 1200×630 dinamicamente.
 - JSON-LD: `ProfessionalService`, `WebSite`, `FAQPage`, `CreativeWork` e `BreadcrumbList` (`lib/schema.ts`).
 - `sitemap.xml` e `robots.txt` dinâmicos, incluindo cada projeto.
-- Páginas de projeto pré-renderizadas (SSG) via `generateStaticParams`.
+- Páginas de projeto renderizadas a cada request a partir do D1 (publicação instantânea).
 - HTML semântico, `lang="pt-BR"`, headings em ordem, alt em todas as mídias.
 
 Antes de publicar: definir `NEXT_PUBLIC_SITE_URL` com o domínio real, registrar o site no Google Search Console (opcionalmente via `GOOGLE_SITE_VERIFICATION`) e enviar o sitemap.

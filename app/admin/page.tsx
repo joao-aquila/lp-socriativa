@@ -1,71 +1,81 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { readProjects, categoryLabel } from "@/lib/projects";
-import { publicAsset } from "@/lib/media";
+import { getAdmin } from "@/lib/access";
+import { readAllProjects, CATEGORIES } from "@/lib/projects";
 import type { Project, ProjectCategory } from "@/lib/types";
-import { ProjectForm } from "./ProjectForm";
-import { DeleteButton } from "./DeleteButton";
-import { logout } from "./actions";
-import { card } from "./ui";
+import { ActiveToggle } from "./ActiveToggle";
+import { Denied } from "./Denied";
+import { MoveButtons } from "./MoveButtons";
+import { Toast } from "./Toast";
+import { buttonPrimary, buttonSmall } from "./ui";
 
 export const dynamic = "force-dynamic";
 
-const ORDER: ProjectCategory[] = ["conteudo", "identidade", "design"];
+const tabLabel: Record<ProjectCategory, string> = {
+  conteudo: "conteúdo",
+  identidade: "identidade visual",
+  design: "design",
+};
 
 function Thumb({ project }: { project: Project }) {
-  const src = publicAsset(project.image);
   return (
-    <div className="aspect-square w-14 shrink-0 overflow-hidden rounded-xl border border-paper/12 bg-night">
-      {src ? (
+    <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-ink ring-1 ring-paper/10 sm:size-16">
+      {project.image ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" className="size-full object-cover" />
+        <img src={project.image} alt="" className="size-full object-cover" />
       ) : (
-        <div className="flex size-full items-center justify-center text-[0.6rem] text-paper/30">
-          sem
-          <br />
-          imagem
+        <div className="flex size-full items-center justify-center text-paper/20">
+          <span aria-hidden="true" className="text-lg">
+            ✳
+          </span>
         </div>
       )}
     </div>
   );
 }
 
-function Row({ project }: { project: Project }) {
+function Row({
+  project,
+  first,
+  last,
+}: {
+  project: Project;
+  first: boolean;
+  last: boolean;
+}) {
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-3 py-4">
-      <Thumb project={project} />
+    <li
+      className={`grid grid-cols-[auto_auto_1fr] items-center gap-x-3 gap-y-3 px-3 py-3 transition-colors hover:bg-paper/[0.03] sm:grid-cols-[auto_auto_1fr_auto_auto] sm:gap-x-5 sm:px-4 ${
+        project.active ? "" : "text-paper/60"
+      }`}
+    >
+      <MoveButtons id={project.id} first={first} last={last} />
 
-      <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-center gap-2 font-bold">
-          <span className="truncate">{project.title}</span>
+      <div className={project.active ? "" : "opacity-45 grayscale"}>
+        <Thumb project={project} />
+      </div>
+
+      <div className="min-w-0">
+        <p className="truncate font-bold">{project.title}</p>
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-paper/50">
+          <span className="truncate">{project.client}</span>
           {project.featured ? (
-            <span className="rounded-full border border-paper/25 px-2 py-0.5 text-[0.65rem] font-medium tracking-wide text-paper/70">
+            <span className="rounded-full bg-paper/10 px-2 py-px text-[0.7rem] font-medium text-paper/75">
               destaque
             </span>
           ) : null}
-        </p>
-        <p className="mt-0.5 truncate text-sm text-paper/50">
-          {project.client}
-          {project.order ? ` · ordem ${project.order}` : ""}
-          {project.href ? " · com link" : ""}
+          {project.image ? null : (
+            <span className="text-[0.7rem] text-paper/40">sem imagem</span>
+          )}
         </p>
       </div>
 
-      {/* no mobile as ações caem para a linha de baixo, alinhadas sob o texto */}
-      <div className="flex w-full items-center gap-4 pl-[4.5rem] text-sm sm:w-auto sm:pl-0">
-        <Link
-          href={`/projetos/${project.slug}`}
-          target="_blank"
-          className="text-paper/70 underline underline-offset-4 hover:text-paper"
-        >
-          ver
-        </Link>
-        <Link
-          href={`/admin?editar=${project.slug}#formulario`}
-          className="text-paper/70 underline underline-offset-4 hover:text-paper"
-        >
+      {/* no mobile, controles descem para uma segunda linha alinhada ao texto */}
+      <div className="col-span-3 flex items-center justify-between gap-4 pl-[5.75rem] sm:col-span-2 sm:justify-end sm:gap-6 sm:pl-0">
+        <ActiveToggle id={project.id} active={project.active} title={project.title} />
+        <Link href={`/admin/${project.id}`} className={buttonSmall}>
           editar
         </Link>
-        <DeleteButton slug={project.slug} title={project.title} />
       </div>
     </li>
   );
@@ -74,86 +84,98 @@ function Row({ project }: { project: Project }) {
 export default async function AdminPage({
   searchParams,
 }: {
-  searchParams: Promise<{ editar?: string; publicado?: string }>;
+  searchParams: Promise<{ categoria?: string }>;
 }) {
-  const { editar, publicado } = await searchParams;
-  const projects = await readProjects();
-  const editing = projects.find((p) => p.slug === editar);
+  if (!(await getAdmin())) return <Denied />;
+
+  const { categoria } = await searchParams;
+  const current = CATEGORIES.includes(categoria as ProjectCategory)
+    ? (categoria as ProjectCategory)
+    : "conteudo";
+
+  const projects = await readAllProjects();
+  const list = projects.filter((p) => p.category === current);
+  const hidden = projects.filter((p) => !p.active).length;
 
   return (
-    <main className="container-lp py-12 pb-24">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+    <main className="container-lp max-w-5xl! py-10 pb-28 sm:py-14">
+      <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h1 className="headline text-4xl">portfólio</h1>
-          <p className="mt-2 text-paper/55">
-            {projects.length}{" "}
-            {projects.length === 1 ? "projeto publicado" : "projetos publicados"}
+          <h1 className="headline text-5xl sm:text-6xl">projetos</h1>
+          <p className="mt-3 text-paper/50">
+            {projects.length} {projects.length === 1 ? "projeto" : "projetos"}
+            {hidden ? ` · ${hidden} ${hidden === 1 ? "oculto" : "ocultos"}` : ""}
           </p>
         </div>
-        <form action={logout}>
-          <button
-            type="submit"
-            className="text-sm text-paper/60 underline underline-offset-4 hover:text-paper"
-          >
-            sair
-          </button>
-        </form>
-      </header>
 
-      {publicado ? (
-        <p className="mt-8 rounded-xl border border-paper/25 bg-night-soft/60 px-4 py-3 text-sm text-paper/80">
-          publicado. o site se atualiza sozinho em cerca de 40 segundos — atualize
-          a página depois disso para ver a mudança no ar.
-        </p>
-      ) : null}
+        <Link href={`/admin/novo?categoria=${current}`} className={buttonPrimary}>
+          <span aria-hidden="true" className="text-lg leading-none">
+            +
+          </span>
+          novo projeto
+        </Link>
+      </div>
 
-      <section id="formulario" className={`mt-10 scroll-mt-8 ${card}`}>
-        <div className="flex flex-wrap items-baseline justify-between gap-3 pb-7">
-          <h2 className="text-2xl font-bold">
-            {editing ? `editando: ${editing.title}` : "novo projeto"}
-          </h2>
-          {editing ? (
+      <nav
+        aria-label="categorias"
+        className="-mx-5 mt-10 flex gap-2 overflow-x-auto px-5 [scrollbar-width:none] md:mx-0 md:px-0"
+      >
+        {CATEGORIES.map((category) => {
+          const count = projects.filter((p) => p.category === category).length;
+          const selected = category === current;
+          return (
             <Link
-              href="/admin"
-              className="text-sm text-paper/60 underline underline-offset-4 hover:text-paper"
+              key={category}
+              href={`/admin?categoria=${category}`}
+              scroll={false}
+              aria-current={selected ? "page" : undefined}
+              className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                selected
+                  ? "bg-paper text-ink"
+                  : "text-paper/60 ring-1 ring-paper/15 hover:text-paper hover:ring-paper/35"
+              }`}
             >
-              criar um novo em vez disso
+              {tabLabel[category]}
+              <span className={selected ? "text-ink/55" : "text-paper/35"}>{count}</span>
             </Link>
-          ) : null}
-        </div>
+          );
+        })}
+      </nav>
 
-        <ProjectForm key={editing?.slug ?? "novo"} project={editing} />
-      </section>
-
-      <section className="mt-14">
-        <h2 className="text-2xl font-bold">projetos publicados</h2>
-
-        {projects.length === 0 ? (
-          <p className="mt-6 text-paper/50">
-            nenhum projeto ainda. use o formulário acima para publicar o primeiro.
+      {list.length === 0 ? (
+        <div className="mt-6 flex flex-col items-center rounded-card border-2 border-dashed border-paper/12 px-6 py-16 text-center">
+          <span aria-hidden="true" className="text-3xl text-paper/25">
+            ✳
+          </span>
+          <p className="mt-4 text-paper/60">
+            nenhum projeto de {tabLabel[current]} ainda.
           </p>
-        ) : (
-          <div className="mt-8 grid gap-10">
-            {ORDER.map((category) => {
-              const group = projects.filter((p) => p.category === category);
-              if (group.length === 0) return null;
+          <Link href={`/admin/novo?categoria=${current}`} className={`${buttonSmall} mt-6`}>
+            adicionar o primeiro
+          </Link>
+        </div>
+      ) : (
+        <>
+          <ul className="mt-6 divide-y divide-paper/8 overflow-hidden rounded-card border border-paper/10 bg-night-soft/30">
+            {list.map((project, index) => (
+              <Row
+                key={project.id}
+                project={project}
+                first={index === 0}
+                last={index === list.length - 1}
+              />
+            ))}
+          </ul>
+          <p className="mt-4 text-sm text-paper/40">
+            a ordem da lista é a ordem do site. a home mostra os 3 primeiros
+            destaques que estão no ar.
+          </p>
+        </>
+      )}
 
-              return (
-                <div key={category}>
-                  <h3 className="text-sm font-bold tracking-wide text-paper/45 uppercase">
-                    {categoryLabel[category]} ({group.length})
-                  </h3>
-                  <ul className="mt-2 divide-y divide-paper/10">
-                    {group.map((project) => (
-                      <Row key={project.slug} project={project} />
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      <Suspense>
+        <Toast />
+      </Suspense>
     </main>
   );
 }

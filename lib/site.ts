@@ -1,5 +1,5 @@
 export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://socriativa.com.br"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://socriativaestudio.com.br"
 ).replace(/\/$/, "");
 
 export const site = {
@@ -22,7 +22,7 @@ export const site = {
     "branding para profissionais liberais",
     "rebranding",
   ],
-  email: "contato@socriativa.com.br",
+  email: "contato@socriativaestudio.com.br",
   whatsapp: "5500000000000",
   instagram: "https://instagram.com/socriativa",
   areaServed: "BR",
