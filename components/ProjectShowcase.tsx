@@ -39,9 +39,9 @@ export function ProjectShowcase({ id, title, subtitle, rows }: Props) {
       {rows.map((row) => (
         <div key={row.label} className="mt-10">
           {row.projects.length ? (
-            <ul aria-label={row.label} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <ul aria-label={row.label} className="grid auto-rows-fr gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {row.projects.map((project, index) => (
-                <Reveal as="li" key={project.slug} delay={(index % 3) * 90}>
+                <Reveal as="li" key={project.slug} delay={(index % 3) * 90} className="flex">
                   <ProjectCard project={project} aspect={row.cardAspect} />
                 </Reveal>
               ))}

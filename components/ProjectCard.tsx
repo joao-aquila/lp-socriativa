@@ -16,7 +16,7 @@ export function ProjectCard({
   const src = project.image ?? null;
 
   return (
-    <article className="group relative overflow-hidden rounded-card bg-ink">
+    <article className="group relative flex w-full flex-col overflow-hidden rounded-card bg-ink">
       <span className="absolute left-4 top-4 z-10 rounded-full bg-ink px-4 py-1.5 text-sm font-bold text-paper">
         {categoryLabel[project.category]}
       </span>
