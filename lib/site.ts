@@ -23,7 +23,7 @@ export const site = {
     "rebranding",
   ],
   email: "am.mellomantovani@gmail.com",
-  whatsapp: "5500000000000",
+  whatsapp: "5518996170022",
   instagram: "https://instagram.com/socriativa",
   areaServed: "BR",
 } as const;

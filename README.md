@@ -119,4 +119,4 @@ Uma vez só:
 
 Antes de publicar: definir `NEXT_PUBLIC_SITE_URL` com o domínio real, registrar o site no Google Search Console (opcionalmente via `GOOGLE_SITE_VERIFICATION`) e enviar o sitemap.
 
-Dados de contato (WhatsApp, e-mail, Instagram) ficam em `lib/site.ts` — o número de WhatsApp atual é placeholder. O formulário envia para `site.email` (`app/contato.ts`).
+Dados de contato (WhatsApp, e-mail, Instagram) ficam em `lib/site.ts` — o WhatsApp vai só com dígitos (DDI + DDD + número). O formulário envia para `site.email` (`app/contato.ts`).
