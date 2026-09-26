@@ -108,6 +108,11 @@ Uma vez só:
    (`send_email` no `wrangler.jsonc`, travado nesse destino); no `next dev` o
    envio é simulado, nada chega de verdade.
 
+   Anti-spam: campo honeypot + limite de 3 envios por IP por hora
+   (`lib/rate-limit.ts`, tabela `contact_log` no D1, só com o hash do IP).
+   O deploy não roda migrations: depois de criar uma nova em `migrations/`,
+   rode `npm run db:migrate:remote`.
+
 ## SEO
 
 - Metadata API com title template, canonical, Open Graph e Twitter card.

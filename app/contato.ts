@@ -1,6 +1,7 @@
 "use server";
 
 import { cf } from "@/lib/cloudflare";
+import { contactAllowed } from "@/lib/rate-limit";
 import { site } from "@/lib/site";
 
 // remetente num endereço do domínio (Email Routing); o destino fica preso ao
@@ -23,6 +24,15 @@ export async function sendContact(_state: ContactState, formData: FormData): Pro
   const contact = text(formData, "contact", 200);
   const idea = text(formData, "idea", 4000);
   if (!name || !contact) return { ok: false, message: "preencha seu nome e um contato" };
+
+  // se o D1 falhar, deixa passar: melhor um spam que perder um cliente
+  const allowed = await contactAllowed().catch((error) => {
+    console.error("falha no limite de contato", error);
+    return true;
+  });
+  if (!allowed) {
+    return { ok: false, message: "muitas mensagens em pouco tempo — tente de novo daqui a pouco ou chame no whatsapp" };
+  }
 
   try {
     await cf().EMAIL.send({
