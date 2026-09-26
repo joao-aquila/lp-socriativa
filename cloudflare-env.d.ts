@@ -4,6 +4,7 @@
 interface __BaseEnv_CloudflareEnv {
 	BUCKET: R2Bucket;
 	DB: D1Database;
+	EMAIL: SendEmail;
 	IMAGES: ImagesBinding;
 	ASSETS: Fetcher;
 	NEXTJS_ENV: string;

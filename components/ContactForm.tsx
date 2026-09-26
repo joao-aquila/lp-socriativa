@@ -1,41 +1,54 @@
 "use client";
 
-import { useState } from "react";
-import { whatsappUrl } from "@/lib/site";
+import { useState, useTransition } from "react";
+import { sendContact, type ContactState } from "@/app/contato";
 
 const field =
   "mt-1 w-full rounded-2xl border border-paper/25 bg-night-soft px-4 py-3 text-paper placeholder:text-paper/35 outline-none transition focus:border-paper";
 
 /**
- * O envio abre o WhatsApp do estúdio com a mensagem já montada — não há
- * backend de e-mail configurado. Para receber por e-mail, troque o handler
- * por uma server action que chame o provedor escolhido.
+ * O envio vira um e-mail para o estúdio (server action + Email Routing).
+ * Campos controlados: se o envio falhar, o texto continua lá.
  */
 export function ContactForm() {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
   const [idea, setIdea] = useState("");
+  const [state, setState] = useState<ContactState>(null);
+  const [pending, startTransition] = useTransition();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const message = [
-      `oi! sou ${name || "alguém que veio pelo site"}.`,
-      idea && `a ideia é: ${idea}`,
-      contact && `meu contato: ${contact}`,
-    ]
-      .filter(Boolean)
-      .join("\n");
-
-    window.open(whatsappUrl(message), "_blank", "noopener,noreferrer");
+    const formData = new FormData(event.currentTarget);
+    startTransition(async () => {
+      const result = await sendContact(null, formData);
+      setState(result);
+      if (result?.ok) {
+        setName("");
+        setContact("");
+        setIdea("");
+      }
+    });
   }
 
   return (
     <form onSubmit={handleSubmit} className="w-full">
+      {/* honeypot: fora da tela e do teclado; gente de verdade não preenche */}
+      <input
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] h-px w-px opacity-0"
+      />
+
       <label className="block">
         <span className="text-sm text-paper/70">seu nome</span>
         <input
+          name="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          maxLength={120}
           required
           autoComplete="name"
           placeholder="como te chamam?"
@@ -46,8 +59,10 @@ export function ContactForm() {
       <label className="mt-4 block">
         <span className="text-sm text-paper/70">e-mail ou whatsapp</span>
         <input
+          name="contact"
           value={contact}
           onChange={(e) => setContact(e.target.value)}
+          maxLength={200}
           required
           placeholder="pra gente te responder"
           className={field}
@@ -57,8 +72,10 @@ export function ContactForm() {
       <label className="mt-4 block">
         <span className="text-sm text-paper/70">o que a gente cria?</span>
         <textarea
+          name="idea"
           value={idea}
           onChange={(e) => setIdea(e.target.value)}
+          maxLength={4000}
           rows={3}
           placeholder="pode ser uma ideia pronta, meio pronta ou um “não sei por onde começar”"
           className={field}
@@ -67,13 +84,17 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="mt-6 w-full rounded-full bg-paper px-6 py-4 text-lg font-extrabold text-ink transition hover:bg-white md:text-xl"
+        disabled={pending}
+        className="mt-6 w-full rounded-full bg-paper px-6 py-4 text-lg font-extrabold text-ink transition hover:bg-white disabled:opacity-60 md:text-xl"
       >
-        tire sua ideia do papel <span aria-hidden="true">↗</span>
+        {pending ? "enviando…" : "tire sua ideia do papel"} <span aria-hidden="true">↗</span>
       </button>
 
-      <p className="mt-3 text-center text-xs text-paper/45">
-        abre uma conversa no whatsapp com o que você escreveu.
+      <p
+        role="status"
+        className={`mt-3 text-center text-xs ${state && !state.ok ? "text-paper" : "text-paper/45"}`}
+      >
+        {state?.message ?? "sua mensagem chega direto no nosso e-mail."}
       </p>
     </form>
   );

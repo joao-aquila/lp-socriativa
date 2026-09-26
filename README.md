@@ -100,6 +100,13 @@ Uma vez só:
    - `https://<time>.cloudflareaccess.com` para `CF_ACCESS_TEAM_DOMAIN`
 
    (em `vars` no `wrangler.jsonc`) e faça o deploy de novo.
+6. **Formulário de contato:** Email > Email Routing em `socriativaestudio.com.br`
+   > *Enable* (ele cria os MX e o SPF; se o domínio já recebe e-mail em outro
+   provedor, isso substitui os MX). Em *Destination addresses*, adicione
+   `am.mellomantovani@gmail.com` e clique no link de verificação que chega no
+   Gmail. O envio sai de `site@socriativaestudio.com.br` pelo binding `EMAIL`
+   (`send_email` no `wrangler.jsonc`, travado nesse destino); no `next dev` o
+   envio é simulado, nada chega de verdade.
 
 ## SEO
 
@@ -112,4 +119,4 @@ Uma vez só:
 
 Antes de publicar: definir `NEXT_PUBLIC_SITE_URL` com o domínio real, registrar o site no Google Search Console (opcionalmente via `GOOGLE_SITE_VERIFICATION`) e enviar o sitemap.
 
-Dados de contato (WhatsApp, e-mail, Instagram) ficam em `lib/site.ts` — o número atual é placeholder.
+Dados de contato (WhatsApp, e-mail, Instagram) ficam em `lib/site.ts` — o número de WhatsApp atual é placeholder. O formulário envia para `site.email` (`app/contato.ts`).

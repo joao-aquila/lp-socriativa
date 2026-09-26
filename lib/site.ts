@@ -22,7 +22,7 @@ export const site = {
     "branding para profissionais liberais",
     "rebranding",
   ],
-  email: "contato@socriativaestudio.com.br",
+  email: "am.mellomantovani@gmail.com",
   whatsapp: "5500000000000",
   instagram: "https://instagram.com/socriativa",
   areaServed: "BR",

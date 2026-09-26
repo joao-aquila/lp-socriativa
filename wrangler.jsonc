@@ -52,6 +52,16 @@
     "binding": "IMAGES"
   },
 
+  // formulário de contato (Email Routing): o destino precisa estar verificado
+  // em Email > Email Routing > Destination addresses
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "destination_address": "am.mellomantovani@gmail.com",
+      "allowed_sender_addresses": ["site@socriativaestudio.com.br"]
+    }
+  ],
+
   "vars": {
     // domínio próprio do bucket R2; vazio => imagens servidas por /media/*
     "IMAGES_BASE_URL": "https://img.socriativaestudio.com.br",
