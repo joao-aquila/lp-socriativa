@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Hero } from "@/components/Hero";
 import { Manifesto } from "@/components/Manifesto";
 import { Services } from "@/components/Services";
+import { ProjectShowcase, ProjectShowcaseSkeleton } from "@/components/ProjectShowcase";
 import { Process } from "@/components/Process";
-import { ProjectShowcase } from "@/components/ProjectShowcase";
 import { FinalCta } from "@/components/FinalCta";
 import { Faq } from "@/components/Faq";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -21,12 +22,45 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+const showcase = {
+  id: "projetos",
+  title: "projetos entregues",
+  subtitle: "um pouquinho do que já saiu daqui",
+};
+
+/** Única parte da home que depende do D1. */
+async function FeaturedProjects() {
   const [conteudo, identidade] = await Promise.all([
     getFeatured("conteudo"),
     getFeatured("identidade"),
   ]);
 
+  return (
+    <ProjectShowcase
+      {...showcase}
+      rows={[
+        {
+          label: "conteúdos entregues",
+          projects: conteudo,
+          cardAspect: "portrait",
+          ctaHref: "/projetos#conteudo",
+          ctaLabel: "veja mais conteúdos",
+          emptyLabel: "novos conteúdos chegando por aqui",
+        },
+        {
+          label: "identidades visuais entregues",
+          projects: identidade,
+          cardAspect: "landscape",
+          ctaHref: "/projetos#identidade",
+          ctaLabel: "veja mais identidades",
+          emptyLabel: "novas identidades chegando por aqui",
+        },
+      ]}
+    />
+  );
+}
+
+export default function HomePage() {
   return (
     <>
       <JsonLd data={[organizationSchema, websiteSchema, faqSchema]} />
@@ -35,29 +69,15 @@ export default async function HomePage() {
         <Hero />
         <Manifesto />
         <Services />
-        <ProjectShowcase
-          id="projetos"
-          title="projetos entregues"
-          subtitle="um pouquinho do que já saiu daqui"
-          rows={[
-            {
-              label: "conteúdos entregues",
-              projects: conteudo,
-              cardAspect: "portrait",
-              ctaHref: "/projetos#conteudo",
-              ctaLabel: "veja mais conteúdos",
-              emptyLabel: "novos conteúdos chegando por aqui",
-            },
-            {
-              label: "identidades visuais entregues",
-              projects: identidade,
-              cardAspect: "landscape",
-              ctaHref: "/projetos#identidade",
-              ctaLabel: "veja mais identidades",
-              emptyLabel: "novas identidades chegando por aqui",
-            },
-          ]}
-        />
+        {/* o topo da página sai na hora, sem esperar a consulta ao D1; os
+            projetos chegam em seguida, no mesmo response (streaming) */}
+        <Suspense
+          fallback={
+            <ProjectShowcaseSkeleton {...showcase} aspects={["portrait", "landscape"]} />
+          }
+        >
+          <FeaturedProjects />
+        </Suspense>
         <Process />
         <Faq />
         <FinalCta />
