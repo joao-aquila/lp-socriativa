@@ -29,7 +29,7 @@ export function SiteHeader() {
         </nav>
 
         <Link href="/" aria-label={`${site.name} — página inicial`}>
-          <Logo width={190} priority className="h-auto w-[150px] md:w-[190px]" />
+          <Logo width={190} eager className="h-auto w-[150px] md:w-[190px]" />
         </Link>
       </div>
     </header>

@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // só HTTPS, inclusive nos subdomínios (img.)
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          // janelas abertas pelo site (WhatsApp, Instagram) não alcançam esta
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
         ],
       },
     ];
@@ -27,6 +31,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [new URL(`${imagesHost.replace(/\/$/, "")}/**`)],
   },
   experimental: {
+    // CSS (~10 KiB) embutido no HTML: some a requisição que bloqueava o render
+    inlineCss: true,
     // o painel envia a imagem do projeto junto com o formulário
     serverActions: { bodySizeLimit: "8mb" },
   },

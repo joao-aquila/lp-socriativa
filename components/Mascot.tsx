@@ -1,33 +1,33 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 type Props = {
-  /** nome do arquivo dentro de /public/images/mascote (ex.: "selfie.png") */
-  file: string;
+  /** arte importada de /public/images/mascote — import estático gera URL com
+   *  hash, e o otimizador responde com cache imutável */
+  src: StaticImageData;
   alt: string;
-  /** proporção largura/altura da arte, para reservar o espaço certo */
-  ratio: number;
   className?: string;
-  priority?: boolean;
+  /** imagem LCP: pré-carrega com prioridade alta */
+  preload?: boolean;
   sizes?: string;
 };
 
 /** Mascote da Sô, com o espaço da arte reservado pela proporção. */
 export function Mascot({
-  file,
+  src,
   alt,
-  ratio,
   className = "",
-  priority = false,
+  preload = false,
   sizes = "(max-width: 768px) 80vw, 40vw",
 }: Props) {
   return (
-    <div className={`relative ${className}`} style={{ aspectRatio: ratio }}>
+    <div className={`relative ${className}`} style={{ aspectRatio: src.width / src.height }}>
       <Image
-        src={`/images/mascote/${file}`}
+        src={src}
         alt={alt}
         fill
         sizes={sizes}
-        priority={priority}
+        preload={preload}
+        fetchPriority={preload ? "high" : undefined}
         className="object-contain"
       />
     </div>

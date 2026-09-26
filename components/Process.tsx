@@ -1,4 +1,5 @@
 import { Mascot } from "./Mascot";
+import notebook from "@/public/images/mascote/notebook.png";
 import { Reveal } from "./Reveal";
 
 const steps = [
@@ -30,9 +31,8 @@ export function Process() {
       <div className="mt-12 grid items-center gap-10 md:grid-cols-[0.8fr_1.2fr]">
         <Reveal>
         <Mascot
-          file="notebook.png"
+          src={notebook}
           alt="Mascote da Sô Criativa trabalhando atrás de um notebook"
-          ratio={1093 / 1200}
           className="w-full max-w-sm justify-self-center"
           sizes="(max-width: 768px) 80vw, 340px"
         />

@@ -6,7 +6,7 @@ import { site, whatsappUrl } from "@/lib/site";
 
 const navegue = [
   { href: "/#servicos", label: "serviços" },
-  { href: "/projetos", label: "projetos" },
+  { href: "/projetos", label: "todos os projetos" },
   { href: "/#sobre", label: "sobre a sô" },
   { href: "/#contato", label: "bora criar?" },
 ];
@@ -23,7 +23,7 @@ const socials = [
   { href: `mailto:${site.email}`, label: `e-mail: ${site.email}`, Icon: MailIcon, external: false },
 ];
 
-const columnTitle = "text-xs font-bold uppercase tracking-[0.18em] text-paper/40";
+const columnTitle = "text-xs font-bold uppercase tracking-[0.18em] text-paper/60";
 const columnLink =
   "text-paper/75 transition hover:text-paper hover:underline underline-offset-4";
 
@@ -99,7 +99,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-paper/10 pt-6 text-xs text-paper/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 flex flex-col gap-3 border-t border-paper/10 pt-6 text-xs text-paper/60 sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {new Date().getFullYear()} {site.legalName}. todos os direitos
             reservados.

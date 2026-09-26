@@ -47,7 +47,7 @@ export function ProjectShowcase({ id, title, subtitle, rows }: Props) {
               ))}
             </ul>
           ) : (
-            <p className="rounded-card border-2 border-dashed border-paper/25 p-10 text-center text-paper/50">
+            <p className="rounded-card border-2 border-dashed border-paper/25 p-10 text-center text-paper/60">
               {row.emptyLabel ?? "novos projetos chegando por aqui"}
             </p>
           )}

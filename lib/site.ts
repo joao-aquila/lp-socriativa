@@ -24,7 +24,7 @@ export const site = {
   ],
   email: "am.mellomantovani@gmail.com",
   whatsapp: "5518996170022",
-  instagram: "https://instagram.com/socriativa",
+  instagram: "https://instagram.com/socriativaestudio",
   areaServed: "BR",
 } as const;
 

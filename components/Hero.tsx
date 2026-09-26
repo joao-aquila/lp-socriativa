@@ -2,13 +2,16 @@ import Link from "next/link";
 import { Mascot } from "./Mascot";
 import { Reveal } from "./Reveal";
 import { Star } from "./Star";
+import selfie from "@/public/images/mascote/selfie.png";
 import { whatsappUrl } from "@/lib/site";
 
 export function Hero() {
   return (
     <section className="container-lp pt-8 pb-10 md:pt-10 md:pb-12" id="topo">
       <div className="grid items-center gap-8 md:grid-cols-[1.15fr_0.85fr]">
-        <Reveal>
+        {/* acima da dobra, sem <Reveal>: o fade dependia da hidratação e
+            atrasava o LCP em quase 1s */}
+        <div>
           <h1 className="headline text-[4rem] leading-[0.88] sm:text-[6rem] lg:text-[7.5rem] xl:text-[8.5rem]">
             estúdio criativo feito para marcas pessoais
           </h1>
@@ -29,18 +32,15 @@ export function Hero() {
               ver projetos
             </Link>
           </div>
-        </Reveal>
+        </div>
 
-        <Reveal delay={120}>
-          <Mascot
-            file="selfie.png"
-            alt="Mascote da Sô Criativa, uma border collie, olhando o celular"
-            ratio={1200 / 1061}
-            className="w-full max-w-md justify-self-center"
-            sizes="(max-width: 768px) 85vw, 480px"
-            priority
-          />
-        </Reveal>
+        <Mascot
+          src={selfie}
+          alt="Mascote da Sô Criativa, uma border collie, olhando o celular"
+          className="w-full max-w-md justify-self-center"
+          sizes="(max-width: 768px) 85vw, 480px"
+          preload
+        />
       </div>
 
       <Reveal delay={200}>

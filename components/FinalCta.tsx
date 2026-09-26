@@ -1,4 +1,5 @@
 import { Mascot } from "./Mascot";
+import microfone from "@/public/images/mascote/microfone.png";
 import { Reveal } from "./Reveal";
 import { ContactForm } from "./ContactForm";
 
@@ -24,9 +25,8 @@ export function FinalCta() {
       <div className="mt-12 grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr]">
         <Reveal className="self-end">
           <Mascot
-            file="microfone.png"
+            src={microfone}
             alt="Mascote da Sô Criativa segurando um microfone boom em frente a uma câmera"
-            ratio={1600 / 816}
             className="w-full"
             sizes="(max-width: 768px) 100vw, 55vw"
           />

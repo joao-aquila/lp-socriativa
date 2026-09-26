@@ -122,7 +122,7 @@ export function ContactForm() {
             </p>
           </div>
         ) : (
-          <p className={`mt-3 text-center text-xs ${state ? "text-paper" : "text-paper/45"}`}>
+          <p className={`mt-3 text-center text-xs ${state ? "text-paper" : "text-paper/60"}`}>
             {state?.message ?? "sua mensagem chega direto no nosso e-mail."}
           </p>
         )}

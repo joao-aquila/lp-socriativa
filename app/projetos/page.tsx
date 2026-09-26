@@ -71,7 +71,7 @@ export default async function ProjetosPage() {
                 ))}
               </div>
             ) : (
-              <p className="mt-8 rounded-card border-2 border-dashed border-paper/25 p-8 text-paper/50">
+              <p className="mt-8 rounded-card border-2 border-dashed border-paper/25 p-8 text-paper/60">
                 nenhum projeto de {categoryLabel[section.category]} publicado
                 ainda.
               </p>

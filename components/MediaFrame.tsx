@@ -55,7 +55,7 @@ export function MediaFrame({
           <span aria-hidden="true" className="text-2xl opacity-50">
             ✳
           </span>
-          <span className="text-xs font-medium uppercase tracking-widest text-paper/45">
+          <span className="text-xs font-medium uppercase tracking-widest text-paper/60">
             {fallbackLabel}
           </span>
         </div>
